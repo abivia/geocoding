@@ -19,7 +19,7 @@ PHP does not need to be built with IPv6 support.
 
 Via composer:
 
-```composer require abivia\geocoding```
+```composer require abivia/geocoding```
 
 ## Caching
 
