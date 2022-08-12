@@ -60,3 +60,26 @@ $geocoder = new Geocoder(IpInfoApi::make(), $cache);
 $info = $geocoder->lookup('4.4.4.4');
 echo $info->latitude() . ', ' . $info->longitude();
 ```
+
+## Subnet queries
+
+For the most part from a geolocation perspective, only the first 24 bits of an IPv4 and the first
+48 of an IPv6 address are significant. Geocoding provides a "subnet" query that will return the last
+queries result in the v4 or v6 range. This can reduce the number of queries on the lookup service,
+increasing performance and (in the case of paid services) reducing costs.
+
+### Subnet Example
+
+```php
+use Abivia\Geocode\Geocoder;
+use Abivia\Geocode\LookupService\IpInfoApi;
+
+$geocoder = new Geocoder(IpInfoApi::make());
+
+// Assume 4.4.4.4 is not currently cached. This will cause the service to be queried. 
+$info = $geocoder->lookupSubnet('4.4.4.4');
+echo $info->latitude() . ', ' . $info->longitude();
+
+// This query will return the cached data for 4.4.4.4
+$info2 = $geocoder->lookupSubnet('4.4.4.8');
+```
