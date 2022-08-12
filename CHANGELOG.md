@@ -1,5 +1,10 @@
 # Change log
 
+#### x.y.z
+
+Added:
+* Live query test for ipstack.com
+
 ## 1.0.1 2022-08-11
 
 Fixed:
