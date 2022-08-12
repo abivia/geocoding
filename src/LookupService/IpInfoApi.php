@@ -14,7 +14,7 @@ class IpInfoApi implements LookupService
     /**
      * @var string Default API base URL (https only on paid plan)
      */
-    protected string $baseUrl = 'https://ipinfo.io/json';
+    protected string $baseUrl = 'https://ipinfo.io/';
 
     /**
      * @param string $token
@@ -37,9 +37,9 @@ class IpInfoApi implements LookupService
      */
     public function query(string $address): ?IpInfoResult
     {
-        $url = "$this->baseUrl/$address?";
+        $url = "$this->baseUrl$address/json";
         if ($this->token !== '') {
-            $url .= http_build_query(['token' => $this->token]);
+            $url .= '?' . http_build_query(['token' => $this->token]);
         }
         $channel = curl_init($url);
         curl_setopt($channel, CURLOPT_RETURNTRANSFER, true);
