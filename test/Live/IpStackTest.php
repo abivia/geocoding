@@ -17,8 +17,8 @@ class IpStackTest extends TestCase
         $geocoder = new Geocoder(IpStackApi::make(trim(file_get_contents($keyfile))));
         $result = $geocoder->lookup('173.239.198.14');
         $this->assertNotNull($result);
-        $this->assertEquals('US', $result->countryCode());
-        $this->assertEquals('173.239.198.14', $result->ipAddress());
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('173.239.198.14', $result->getIpAddress());
     }
 
 }

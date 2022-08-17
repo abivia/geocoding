@@ -19,8 +19,8 @@ class GeocodeTest extends TestCase
     {
         $result = $this->testObj->lookup('173.239.198.14');
         $this->assertNotNull($result);
-        $this->assertEquals('US', $result->countryCode());
-        $this->assertEquals('173.239.198.14', $result->ipAddress());
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('173.239.198.14', $result->getIpAddress());
     }
 
     public function testLookupBad()
@@ -40,13 +40,13 @@ class GeocodeTest extends TestCase
         $_SERVER['REMOTE_ADDR'] = '67.61.113.220';
         $result = $this->testObj->lookupHttp();
         $this->assertNotNull($result);
-        $this->assertEquals('US', $result->countryCode());
-        $this->assertEquals('67.61.113.220', $result->ipAddress());
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('67.61.113.220', $result->getIpAddress());
         $_SERVER['HTTP_X_FORWARDED_FOR'] = '148.170.126.209';
         $result = $this->testObj->lookupHttp();
         $this->assertNotNull($result);
-        $this->assertEquals('CA', $result->countryCode());
-        $this->assertEquals('148.170.126.209', $result->ipAddress());
+        $this->assertEquals('CA', $result->getCountryCode());
+        $this->assertEquals('148.170.126.209', $result->getIpAddress());
     }
 
     public function testLookupHttpNoServer()
@@ -61,7 +61,7 @@ class GeocodeTest extends TestCase
     {
         $result = $this->testObj->lookup('173.239.198.14');
         $this->assertNotNull($result);
-        $this->assertEquals('173.239.198.14', $result->ipAddress());
+        $this->assertEquals('173.239.198.14', $result->getIpAddress());
     }
 
     public function testLookupSubNetV4Cached()
@@ -70,7 +70,7 @@ class GeocodeTest extends TestCase
         $this->assertNotNull($result);
         $result = $this->testObj->lookupSubNet('173.239.198.99');
         $this->assertNotNull($result);
-        $this->assertEquals('173.239.198.14', $result->ipAddress());
+        $this->assertEquals('173.239.198.14', $result->getIpAddress());
     }
 
 }

@@ -17,38 +17,6 @@ class IpStackResult implements GeocodeResult
         $this->data = $data;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function addressLine1(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addressLine2(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function administrativeArea(): ?string
-    {
-        return $this->data['region_name'] ?? null;
-    }
-
-    /**
-     * The administrative area (state, province, etc) as a code, if available.
-     */
-    public function administrativeAreaCode(): ?string
-    {
-        return $this->data['region_code'] ?? null;
-    }
-
     public function cached(?bool $set = null): bool
     {
         if ($set !== null) {
@@ -58,9 +26,41 @@ class IpStackResult implements GeocodeResult
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getAddressLine1(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAddressLine2(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAdministrativeArea(): ?string
+    {
+        return $this->data['region_name'] ?? null;
+    }
+
+    /**
+     * The administrative area (state, province, etc) as a code, if available.
+     */
+    public function getAdministrativeAreaCode(): ?string
+    {
+        return $this->data['region_code'] ?? null;
+    }
+
+    /**
      * The name of the country
      */
-    public function country(): ?string
+    public function getCountry(): ?string
     {
         return $this->data['country_name'] ?? null;
     }
@@ -68,12 +68,12 @@ class IpStackResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function countryCode(): ?string
+    public function getCountryCode(): ?string
     {
         return $this->data['country_code'] ?? null;
     }
 
-    public function data(): ?array
+    public function getData(): ?array
     {
         return $this->data;
     }
@@ -81,17 +81,17 @@ class IpStackResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function dependentLocality(): ?string
+    public function getDependentLocality(): ?string
     {
         return null;
     }
 
-    public function ipAddress(): string
+    public function getIpAddress(): string
     {
         return $this->data['ip'];
     }
 
-    public function latitude(): ?float
+    public function getLatitude(): ?float
     {
         return $this->data['latitude'] ?? null;
     }
@@ -99,7 +99,7 @@ class IpStackResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function locale(): ?string
+    public function getLocale(): ?string
     {
         return 'en-US';
     }
@@ -107,12 +107,12 @@ class IpStackResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function locality(): ?string
+    public function getLocality(): ?string
     {
         return $this->data['city'] ?? null;
     }
 
-    public function longitude(): ?float
+    public function getLongitude(): ?float
     {
         return $this->data['longitude'] ?? null;
     }
@@ -120,7 +120,7 @@ class IpStackResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function postalCode(): ?string
+    public function getPostalCode(): ?string
     {
         return $this->data['zip'] ?? null;
     }
@@ -128,12 +128,12 @@ class IpStackResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function sortingCode(): ?string
+    public function getSortingCode(): ?string
     {
         return null;
     }
 
-    public function timezone(): ?string
+    public function getTimezone(): ?string
     {
         return $this->data['time_zone']['id'] ?? null;
     }

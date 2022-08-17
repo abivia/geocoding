@@ -9,48 +9,13 @@ namespace Abivia\Geocode\GeocodeResult;
 class IpInfoResult implements GeocodeResult
 {
     private ?array $data;
-
-    protected ?float $latitude;
-
-    protected ?float $longitude;
-
     private bool $fromCache = false;
+    protected ?float $latitude;
+    protected ?float $longitude;
 
     public function __construct(?array $data)
     {
         $this->data = $data;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addressLine1(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addressLine2(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function administrativeArea(): ?string
-    {
-        return $this->data['region'] ?? null;
-    }
-
-    /**
-     * The administrative area (state, province, etc) as a code, if available.
-     */
-    public function administrativeAreaCode(): ?string
-    {
-        return null;
     }
 
     public function cached(?bool $set = null): bool
@@ -62,9 +27,41 @@ class IpInfoResult implements GeocodeResult
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getAddressLine1(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAddressLine2(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAdministrativeArea(): ?string
+    {
+        return $this->data['region'] ?? null;
+    }
+
+    /**
+     * The administrative area (state, province, etc) as a code, if available.
+     */
+    public function getAdministrativeAreaCode(): ?string
+    {
+        return null;
+    }
+
+    /**
      * The name of the country
      */
-    public function country(): ?string
+    public function getCountry(): ?string
     {
         return $this->data['country'] ?? null;
     }
@@ -72,12 +69,12 @@ class IpInfoResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function countryCode(): ?string
+    public function getCountryCode(): ?string
     {
         return $this->data['country'] ?? null;
     }
 
-    public function data(): ?array
+    public function getData(): ?array
     {
         return $this->data;
     }
@@ -85,17 +82,17 @@ class IpInfoResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function dependentLocality(): ?string
+    public function getDependentLocality(): ?string
     {
         return null;
     }
 
-    public function ipAddress(): string
+    public function getIpAddress(): string
     {
         return $this->data['ip'];
     }
 
-    public function latitude(): ?float
+    public function getLatitude(): ?float
     {
         if (!isset($this->latitude)) {
             $this->parseLoc();
@@ -106,7 +103,7 @@ class IpInfoResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function locale(): ?string
+    public function getLocale(): ?string
     {
         return 'en-US';
     }
@@ -114,17 +111,38 @@ class IpInfoResult implements GeocodeResult
     /**
      * @inheritDoc
      */
-    public function locality(): ?string
+    public function getLocality(): ?string
     {
         return $this->data['city'] ?? null;
     }
 
-    public function longitude(): ?float
+    public function getLongitude(): ?float
     {
         if (!isset($this->longitude)) {
             $this->parseLoc();
         }
         return $this->longitude;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPostalCode(): ?string
+    {
+        return $this->data['postal'] ?? null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getSortingCode(): ?string
+    {
+        return null;
+    }
+
+    public function getTimezone(): ?string
+    {
+        return $this->data['timezone'] ?? null;
     }
 
     private function parseLoc()
@@ -137,27 +155,6 @@ class IpInfoResult implements GeocodeResult
             $this->latitude = null;
             $this->longitude = null;
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postalCode(): ?string
-    {
-        return $this->data['postal'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function sortingCode(): ?string
-    {
-        return null;
-    }
-
-    public function timezone(): ?string
-    {
-        return $this->data['timezone'] ?? null;
     }
 
 }

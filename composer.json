@@ -17,7 +17,7 @@
   "require": {
     "php": "^8.1",
     "ext-curl": "*",
-    "abivia/cogs": "^1",
+    "abivia/cogs": "^2",
     "mlocati/ip-lib": "^1"
   },
   "require-dev": {
@@ -31,7 +31,8 @@
   "repositories": [
     {
       "type": "path",
-      "url": "../cogs"
+      "url": "../cogs",
+      "canonical": false
     }
   ],
   "config": {

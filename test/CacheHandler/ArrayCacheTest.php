@@ -39,7 +39,7 @@ class ArrayCacheTest extends TestCase
         $result = $this->testObj->getSubnet($subnetAddress);
         $this->assertNotNull($result);
         $this->assertTrue($result->cached());
-        $this->assertEquals('123.123.123.123', $result->ipAddress());
+        $this->assertEquals('123.123.123.123', $result->getIpAddress());
     }
 
     public function testCacheExpiry()

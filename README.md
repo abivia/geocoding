@@ -39,7 +39,7 @@ use Abivia\Geocode\LookupService\IpInfoApi;
 
 $geocoder = new Geocoder(IpInfoApi::make());
 $info = $geocoder->lookup('4.4.4.4');
-echo $info->latitude() . ', ' . $info->longitude();
+echo $info->getLatitude() . ', ' . $info->getLongitude();
 ```
 
 The geocoder normalizes results from different services using the GeocodeResult interface, but 
@@ -58,7 +58,7 @@ $cache = new FileCache('mycache.json');
 $cache->hitCacheTime(6 * 3600);
 $geocoder = new Geocoder(IpInfoApi::make(), $cache);
 $info = $geocoder->lookup('4.4.4.4');
-echo $info->latitude() . ', ' . $info->longitude();
+echo $info->getLatitude() . ', ' . $info->getLongitude();
 ```
 
 ## Subnet queries
@@ -78,7 +78,7 @@ $geocoder = new Geocoder(IpInfoApi::make());
 
 // Assume 4.4.4.4 is not currently cached. This will cause the service to be queried. 
 $info = $geocoder->lookupSubnet('4.4.4.4');
-echo $info->latitude() . ', ' . $info->longitude();
+echo $info->getLatitude() . ', ' . $info->getLongitude();
 
 // This query will return the cached data for 4.4.4.4
 $info2 = $geocoder->lookupSubnet('4.4.4.8');

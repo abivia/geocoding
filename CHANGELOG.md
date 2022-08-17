@@ -1,9 +1,12 @@
 # Change log
 
-#### x.y.z
+# 2.0.0
 
 Added:
 * Live query test for ipstack.com
+
+Changed:
+* Updated getter methods for compatibility with abivia/cogs 2.0
 
 ## 1.0.1 2022-08-11
 

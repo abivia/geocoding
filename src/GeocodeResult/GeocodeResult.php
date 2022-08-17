@@ -8,12 +8,12 @@ interface GeocodeResult extends AddressProperties
 {
     public function cached(?bool $set = null): bool;
 
-    public function ipAddress(): string;
+    public function getIpAddress(): string;
 
-    public function latitude(): ?float;
+    public function getLatitude(): ?float;
 
-    public function longitude(): ?float;
+    public function getLongitude(): ?float;
 
-    public function timezone(): ?string;
+    public function getTimezone(): ?string;
 
 }
