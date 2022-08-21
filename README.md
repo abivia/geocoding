@@ -83,3 +83,9 @@ echo $info->getLatitude() . ', ' . $info->getLongitude();
 // This query will return the cached data for 4.4.4.4
 $info2 = $geocoder->lookupSubnet('4.4.4.8');
 ```
+
+## Donations welcome
+
+If you're getting something out of Geocoding, you can sponsor us in any amount you wish using Liberapay
+[![Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/abivia/donate).
+Liberapay is itself run on donations and charges no fees beyond bank charges.
