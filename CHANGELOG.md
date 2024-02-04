@@ -1,5 +1,10 @@
 # Change log
 
+# 2.1.0
+
+Changed:
+* Made the static function GeoCoder::getAddressFromHttp() public.
+
 # 2.0.0
 
 Added:

@@ -68,7 +68,7 @@ class Geocoder
      * @return AddressInterface
      * @throws AddressNotFoundException
      */
-    static protected function getAddressFromHttp(): AddressInterface
+    static public function getAddressFromHttp(): AddressInterface
     {
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ipAddress = IpAddressFactory::parseAddressString($_SERVER['HTTP_X_FORWARDED_FOR']);
