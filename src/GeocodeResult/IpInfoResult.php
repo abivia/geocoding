@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Abivia\Geocode\GeocodeResult;
 
 /**
- * Container for a result returned by ipstack.com.
+ * Container for a result returned by ipinfo.io.
  */
 class IpInfoResult implements GeocodeResult
 {

@@ -11,19 +11,22 @@ use function time;
  * The array cache prevents multiple lookups for the same address/subnet in a single
  * request/session.
  */
-class ArrayCache implements CacheHandler
+class ArrayCache extends AbstractCache implements CacheHandler
 {
     protected array $cache = [];
-    protected bool $hit;
-    protected int $hitCacheTime = 3600;
-    protected int $missCacheTime = 3600;
     protected array $subnets = [];
 
+    /**
+     * @inheritDoc
+     */
     public function get(AddressInterface $address): ?GeocodeResult
     {
         return $this->lookup($address->getComparableString());
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getSubnet(AddressInterface $address): ?GeocodeResult
     {
         $reference = $this->subnets[$this->subnetAddress($address)] ?? null;
@@ -33,19 +36,12 @@ class ArrayCache implements CacheHandler
         return $this->lookup($reference);
     }
 
-    public function hit(): bool
-    {
-        return $this->hit;
-    }
-
-    public function hitCacheTime(?int $secs = null): int
-    {
-        if ($secs !== null) {
-            $this->hitCacheTime = $secs;
-        }
-        return $this->hitCacheTime;
-    }
-
+    /**
+     * Look for an address and return it if found.
+     *
+     * @param string $fullAddress The full IP address to look up
+     * @return GeocodeResult|null
+     */
     protected function lookup(string $fullAddress): ?GeocodeResult
     {
         $this->hit = false;
@@ -68,31 +64,15 @@ class ArrayCache implements CacheHandler
         return $result;
     }
 
-    public function missCacheTime(?int $secs = null): int
-    {
-        if ($secs !== null) {
-            $this->missCacheTime = $secs;
-        }
-        return $this->missCacheTime;
-    }
-
-    public function set(AddressInterface $address, ?GeocodeResult $data)
+    /**
+     * @inheritDoc
+     */
+    public function set(AddressInterface $address, ?GeocodeResult $data): void
     {
         $fullAddress = $address->getComparableString();
-        $expires = time() + ($data === null ? $this->missCacheTime : $this->hitCacheTime);
+        $expires = time() + ($data === null ? $this->missTime : $this->hitTime);
         $this->cache[$fullAddress] = ['data' => $data, 'expires' => $expires];
         $this->subnets[$this->subnetAddress($address)] = $fullAddress;
-    }
-
-    protected function subnetAddress(AddressInterface $address): string
-    {
-        $fullAddress = $address->getComparableString();
-        if ($address instanceof IPv4) {
-            $Subnet = substr($fullAddress, 0, 11);
-        } else {
-            $Subnet = substr($fullAddress, 0, 14);
-        }
-        return $Subnet;
     }
 
 }

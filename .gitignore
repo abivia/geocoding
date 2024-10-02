@@ -4,3 +4,4 @@
 /.phpunit.result.cache
 /.ipstack-key
 /test/CacheHandler/filecache.json
+/test/CacheHandler/pdo.sqlite

@@ -1,5 +1,14 @@
 # Change log
 
+# 2.2.0
+
+Added:
+* PdoCache handler, tests for PDO cach on a sqlite database.
+* Abstract Cache class
+
+Changed:
+* Restructured cache handlers around the new abstract class.
+
 # 2.1.0
 
 Changed:

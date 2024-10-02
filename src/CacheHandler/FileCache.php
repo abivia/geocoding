@@ -15,7 +15,7 @@ class FileCache extends ArrayCache implements CacheHandler
 
     public function __construct(string $cacheFile)
     {
-        $this->hitCacheTime = 7 * 24 * 3600;
+        $this->hitTime = 7 * 24 * 3600;
         $this->cacheFile = $cacheFile;
         $this->loadCache();
     }
@@ -32,8 +32,8 @@ class FileCache extends ArrayCache implements CacheHandler
             if ($cacheInfo) {
                 $this->cache = unserialize($cacheInfo->cache);
                 $this->subnets = unserialize($cacheInfo->Subnets);
-                $this->hitCacheTime = $cacheInfo->hitCacheTime;
-                $this->missCacheTime = $cacheInfo->missCacheTime;
+                $this->hitTime = $cacheInfo->hitCacheTime;
+                $this->missTime = $cacheInfo->missCacheTime;
             }
             $this->purgeExpiredCache();
         } else {
@@ -62,8 +62,8 @@ class FileCache extends ArrayCache implements CacheHandler
         $cacheInfo = [
             'cache' => serialize($this->cache),
             'Subnets'=>serialize($this->subnets),
-            'hitCacheTime' => $this->hitCacheTime,
-            'missCacheTime' => $this->missCacheTime,
+            'hitCacheTime' => $this->hitTime,
+            'missCacheTime' => $this->missTime,
         ];
         file_put_contents($this->cacheFile, json_encode($cacheInfo));
     }
