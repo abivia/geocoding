@@ -23,13 +23,21 @@ Via composer:
 
 ## Caching
 
-Geocoding comes with two cache handlers designed for light use. The array cache will retain lookup
-results for the lifetime of the current request (or session if stored in a session variable). The
-file cache stores cached data in a text file. Neither offers support for concurrent requests.
+Geocoding comes with two cache handlers designed for light use and a database cache for heavier use.
+The array cache will retain lookup results for the lifetime of the current request (or session if
+stored in a session variable).
+The file cache stores cached data in a text file.
+Neither offers support for concurrent requests.
+
+The PDO Cache takes a connection to a database, optionally with table names to override the
+default tables `geocoder_cache_ip` and `geocoder_cache_subnet`.
+The cache handler will create these tables if they do not already exist.
 
 Applications can create persistent caches by conforming to the CacheHandler interface. Caches
-support different cache times for lookup hits and lookup misses. In a file cache, the default cache
-time for a hit is seven days, the cache time for a miss is one hour. 
+support different cache times for lookup hits and lookup misses.
+In a file cache, the default cache time for a successful lookup is seven days, 
+the cache time for a failed lookup is one hour.
+The PDO cach defaults to 30 days for a successful lookup and one hour for a failed lookup.
 
 ## Sample Usage
 
@@ -46,7 +54,7 @@ The geocoder normalizes results from different services using the GeocodeResult 
 applications can retrieve the service's response through the GeocodeResult::data() method to access
 extended information.
 
-## Using a file cache
+## Example using a file cache
 
 ```php
 use Abivia\Geocode\CacheHandler\FileCache;
@@ -88,4 +96,4 @@ $info2 = $geocoder->lookupSubnet('4.4.4.8');
 
 If you're getting something out of Geocoding, you can sponsor us in any amount you wish using Liberapay
 [![Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/abivia/donate).
-Liberapay is itself run on donations and charges no fees beyond bank charges.
+Liberapay is itself run on donations and takes no fees beyond bank charges.
