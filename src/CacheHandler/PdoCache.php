@@ -13,6 +13,7 @@ class PdoCache extends AbstractCache implements CacheHandler
     protected PDO $db;
     protected string $dbIpTable = 'geocoder_cache_ip';
     protected string $dbSubnetTable = 'geocoder_cache_subnet';
+    protected string $dbOptionsTable = 'geocoder_cache_options';
     protected bool $hit;
 
     /**
@@ -22,7 +23,12 @@ class PdoCache extends AbstractCache implements CacheHandler
      * @param string|null $dbIpTable Name of the IP table, if it is to be overridden.
      * @param string|null $dbSubnetTable Name of the subnet mapping table, if it is to be overridden.
      */
-    public function __construct(PDO $db, ?string $dbIpTable = null, ?string $dbSubnetTable = null)
+    public function __construct(
+        PDO $db,
+        ?string $dbIpTable = null,
+        ?string $dbSubnetTable = null,
+        ?string $dbOptionsTable = null
+    )
     {
         $this->hitTime = 30 * 24 * 3600;
         $this->db = $db;
@@ -31,6 +37,9 @@ class PdoCache extends AbstractCache implements CacheHandler
         }
         if ($dbSubnetTable) {
             $this->dbSubnetTable = $dbSubnetTable;
+        }
+        if ($dbOptionsTable) {
+            $this->dbOptionsTable = $dbOptionsTable;
         }
         $this->loadCache();
     }
@@ -119,6 +128,48 @@ class PdoCache extends AbstractCache implements CacheHandler
             . ", `mapped` VARCHAR(64)"
             . ")";
         $this->db->query($sql);
+        $sql = "CREATE TABLE IF NOT EXISTS `$this->dbOptionsTable` ("
+            . " `key` VARCHAR(255) PRIMARY KEY"
+            . ", `value` VARCHAR(255)"
+            . ")";
+        $this->db->query($sql);
+        $this->purgeExpiredCache();
+    }
+
+    private function purgeExpiredCache(): void
+    {
+        // Check for a session variable
+        $sessionKey = self::class . '::last_ip_purge_time';
+        $lastPurge = $_SESSION[$sessionKey] ?? false;
+        if ($lastPurge === false) {
+            // Fetch the time of the last purge
+            $lastQuery = $this->db->prepare(
+                "SELECT `value` FROM `$this->dbOptionsTable` WHERE `key`=:key"
+            );
+            $lastQuery->execute([':key' => 'last_ip_purge_time']);
+            $lastPurge = $lastQuery->fetchColumn();
+
+            // If there's still no last purge time, create it and it set to zero
+            if ($lastPurge === false) {
+                $this->db->query(
+                    "INSERT INTO `$this->dbOptionsTable` (`key`,`value`)"
+                    . "VALUES ('last_ip_purge_time', 0)"
+                );
+                $lastPurge = 0;
+                $_SESSION[$sessionKey] = 0;
+            }
+        }
+
+        // Do we need to run a purge cycle?
+        $now = time();
+        if ($lastPurge + $this->purgeTime < $now) {
+            $this->db->query("DELETE FROM `$this->dbIpTable` WHERE `expires`<$now");
+            $this->db->query(
+                "UPDATE `$this->dbOptionsTable` SET `value`=$now"
+                . " WHERE `key`='last_ip_purge_time'"
+            );
+            $_SESSION[$sessionKey] = $now;
+        }
     }
 
     /**

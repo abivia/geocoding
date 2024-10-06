@@ -1,9 +1,17 @@
 # Change log
 
+# 2.3.0
+
+Added:
+* PdoCache cache purge logic and options table.
+  Changed constructor for CacheHandler\PdoCache to allow overriding of the options table name. 
+  Last purge time is stored in the database
+  and cached in a session variable prefixed by the classname.
+
 # 2.2.0
 
 Added:
-* PdoCache handler, tests for PDO cach on a sqlite database.
+* PdoCache handler, tests for PDO cache on a sqlite database.
 * Abstract Cache class
 
 Changed:

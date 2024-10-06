@@ -8,7 +8,7 @@ seamlessly support other IP address geocoding services.
 
 Geocoding requires:
 
-* PHP 8.1 or higher
+* PHP 8.2 or higher
 * ext-curl to perform API calls
 * abivia/cogs for address support
 * mlocati/ip-lib for IP address support
@@ -30,14 +30,22 @@ The file cache stores cached data in a text file.
 Neither offers support for concurrent requests.
 
 The PDO Cache takes a connection to a database, optionally with table names to override the
-default tables `geocoder_cache_ip` and `geocoder_cache_subnet`.
+default tables `geocoder_cache_ip`, `geocoder_cache_subnet` and `geocoder_cache_options`.
 The cache handler will create these tables if they do not already exist.
 
 Applications can create persistent caches by conforming to the CacheHandler interface. Caches
-support different cache times for lookup hits and lookup misses.
-In a file cache, the default cache time for a successful lookup is seven days, 
-the cache time for a failed lookup is one hour.
-The PDO cach defaults to 30 days for a successful lookup and one hour for a failed lookup.
+support different retention times for lookup hits and lookup misses.
+In a file cache, the default retention time for a successful lookup is seven days, 
+the default retention time for a failed lookup is one hour.
+The PDO cache defaults to 30 days for a successful lookup and one hour for a failed lookup.
+
+### Cache Purging
+
+Array caches are expected to be transient, so there is no purge logic.
+The file cache runs a purge at the time the cache is loaded.
+The PDO cache runs at the interval set by the `purgeCacheTime()` method, which defaults to 24 hours.
+On the first object creation, 
+the last purge time is loaded from the database and cached in the session to reduce overhead.
 
 ## Sample Usage
 

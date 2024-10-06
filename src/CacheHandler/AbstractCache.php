@@ -9,8 +9,18 @@ use IPLib\Address\IPv4;
 abstract class AbstractCache implements CacheHandler
 {
     protected bool $hit;
+    /**
+     * @var int Default time to retain a successful lookup in cache
+     */
     protected int $hitTime = 3600;
+    /**
+     * @var int Default time to retain a failed lookup in cache
+     */
     protected int $missTime = 3600;
+    /**
+     * @var int Default purge time
+     */
+    protected int $purgeTime = 24 * 3600;
 
     /**
      * Look up an IP address.
@@ -57,6 +67,19 @@ abstract class AbstractCache implements CacheHandler
             $this->missTime = $secs;
         }
         return $this->missTime;
+    }
+
+    /**
+     * Set the time that an unsuccessful lookup will be cached.
+     * @param int|null $secs Retention time in seconds.
+     * @return int
+     */
+    public function purgeCacheTime(?int $secs = null): int
+    {
+        if ($secs !== null) {
+            $this->purgeTime = $secs;
+        }
+        return $this->purgeTime;
     }
 
     /**
