@@ -1,10 +1,16 @@
 # Change log
 
+# 2.4.0
+
+Added:
+* The `PdoCache` constructor now accepts a `dbOptions` array to allow passing of additional
+  driver-specific attributes when creating tables. 
+
 # 2.3.0
 
 Added:
-* PdoCache cache purge logic and options table.
-  Changed constructor for CacheHandler\PdoCache to allow overriding of the options table name. 
+* `PdoCache` cache purge logic and options table.
+  Changed constructor for `CacheHandler\PdoCache` to allow overriding of the options table name. 
   Last purge time is stored in the database
   and cached in a session variable prefixed by the classname.
 

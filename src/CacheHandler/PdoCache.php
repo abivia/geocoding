@@ -13,6 +13,7 @@ class PdoCache extends AbstractCache implements CacheHandler
     protected PDO $db;
     protected string $dbIpTable = 'geocoder_cache_ip';
     protected string $dbSubnetTable = 'geocoder_cache_subnet';
+    protected array $dbOptions = [];
     protected string $dbOptionsTable = 'geocoder_cache_options';
     protected bool $hit;
 
@@ -22,12 +23,16 @@ class PdoCache extends AbstractCache implements CacheHandler
      * @param PDO $db The database connection.
      * @param string|null $dbIpTable Name of the IP table, if it is to be overridden.
      * @param string|null $dbSubnetTable Name of the subnet mapping table, if it is to be overridden.
+     * @param string|null $dbOptionsTable Name of a table for storing configuration, if it is to be overridden.
+     * @param array|null $dbOptions Options to be added when creating a table, indexed by database
+     *                  connection type (eg. for mysql: to specify engine, charset, collate)
      */
     public function __construct(
         PDO $db,
         ?string $dbIpTable = null,
         ?string $dbSubnetTable = null,
-        ?string $dbOptionsTable = null
+        ?string $dbOptionsTable = null,
+        ?array $dbOptions = []
     )
     {
         $this->hitTime = 30 * 24 * 3600;
@@ -41,6 +46,7 @@ class PdoCache extends AbstractCache implements CacheHandler
         if ($dbOptionsTable) {
             $this->dbOptionsTable = $dbOptionsTable;
         }
+        $this->dbOptions = $dbOptions;
         $this->loadCache();
     }
 
@@ -113,12 +119,14 @@ class PdoCache extends AbstractCache implements CacheHandler
      */
     private function loadCache(): void
     {
+        // Get any attributes based on the connection type
+        $attributes = $this->dbOptions[$this->db->getAttribute(PDO::ATTR_DRIVER_NAME)] ?? '';
         // Make sure our tables are there
         $sql = "CREATE TABLE IF NOT EXISTS `$this->dbIpTable` ("
             . " `ip` VARCHAR(64) PRIMARY KEY"
             . ", `data` TEXT"
             . ", `expires` INTEGER"
-            . ")";
+            . ") $attributes";
         $this->db->query($sql);
         $sql = "CREATE INDEX IF NOT EXISTS `{$this->dbIpTable}_expires`"
             . " ON `$this->dbIpTable` (`expires`)";
@@ -126,12 +134,12 @@ class PdoCache extends AbstractCache implements CacheHandler
         $sql = "CREATE TABLE IF NOT EXISTS `$this->dbSubnetTable` ("
             . " `subnet` VARCHAR(64) PRIMARY KEY"
             . ", `mapped` VARCHAR(64)"
-            . ")";
+            . ") $attributes";
         $this->db->query($sql);
         $sql = "CREATE TABLE IF NOT EXISTS `$this->dbOptionsTable` ("
             . " `key` VARCHAR(255) PRIMARY KEY"
             . ", `value` VARCHAR(255)"
-            . ")";
+            . ") $attributes";
         $this->db->query($sql);
         $this->purgeExpiredCache();
     }
