@@ -1,5 +1,12 @@
 # Change log
 
+# 2.4.1
+
+Fixed:
+* Failed to handle a null result when encoding an IP address in `Geocoder::getAddressFromHttp`.
+  Now an AddressNotFoundException is thrown.
+  The passed address is HTML escaped sor security.
+
 # 2.4.0
 
 Added:

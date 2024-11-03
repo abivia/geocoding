@@ -71,11 +71,16 @@ class Geocoder
     static public function getAddressFromHttp(): AddressInterface
     {
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ipAddress = IpAddressFactory::parseAddressString($_SERVER['HTTP_X_FORWARDED_FOR']);
+            $source = $_SERVER['HTTP_X_FORWARDED_FOR'];
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
-            $ipAddress = IpAddressFactory::parseAddressString($_SERVER['REMOTE_ADDR']);
+            $source = $_SERVER['REMOTE_ADDR'];
         } else {
             throw new AddressNotFoundException('No address found in server super-global.');
+        }
+        $ipAddress = IpAddressFactory::parseAddressString($source);
+        if ($ipAddress === null) {
+            $source = htmlspecialchars($source);
+            throw new AddressNotFoundException("Failed to parse $source as an IP address.");
         }
         return $ipAddress;
     }
