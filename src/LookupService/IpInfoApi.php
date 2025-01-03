@@ -24,7 +24,7 @@ class IpInfoApi implements LookupService
         $this->token = $token;
     }
 
-    static public function make(string $token = ''): static
+    public static function make(string $token = ''): static
     {
         return new static($token);
     }

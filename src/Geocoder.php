@@ -69,7 +69,7 @@ class Geocoder
      * @return AddressInterface
      * @throws AddressNotFoundException
      */
-    static public function getAddressFromHttp(): AddressInterface
+    public static function getAddressFromHttp(): AddressInterface
     {
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $source = $_SERVER['HTTP_X_FORWARDED_FOR'];
@@ -96,7 +96,7 @@ class Geocoder
      * @param AddressInterface $address The full address.
      * @return string The subnet part of the address.
      */
-    static public function getSubnetAddress(AddressInterface $address): string
+    public static function getSubnetAddress(AddressInterface $address): string
     {
         $fullAddress = $address->getComparableString();
         if ($address instanceof IPv4) {

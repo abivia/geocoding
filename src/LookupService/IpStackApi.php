@@ -34,7 +34,7 @@ class IpStackApi implements LookupService
         $this->accessKey = $accessKey;
     }
 
-    static public function make(string $accessKey): static
+    public static function make(string $accessKey): static
     {
         return new static($accessKey);
     }
