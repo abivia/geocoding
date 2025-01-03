@@ -2,9 +2,9 @@
 
 namespace Abivia\Geocode\CacheHandler;
 
+use Abivia\Geocode\Geocoder;
 use Abivia\Geocode\GeocodeResult\GeocodeResult;
 use IPLib\Address\AddressInterface;
-use IPLib\Address\IPv4;
 use function time;
 
 /**
@@ -29,7 +29,7 @@ class ArrayCache extends AbstractCache implements CacheHandler
      */
     public function getSubnet(AddressInterface $address): ?GeocodeResult
     {
-        $reference = $this->subnets[$this->subnetAddress($address)] ?? null;
+        $reference = $this->subnets[Geocoder::getSubnetAddress($address)] ?? null;
         if ($reference === null) {
             return null;
         }
@@ -72,7 +72,7 @@ class ArrayCache extends AbstractCache implements CacheHandler
         $fullAddress = $address->getComparableString();
         $expires = time() + ($data === null ? $this->missTime : $this->hitTime);
         $this->cache[$fullAddress] = ['data' => $data, 'expires' => $expires];
-        $this->subnets[$this->subnetAddress($address)] = $fullAddress;
+        $this->subnets[Geocoder::getSubnetAddress($address)] = $fullAddress;
     }
 
 }

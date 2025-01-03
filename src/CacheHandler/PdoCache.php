@@ -1,12 +1,12 @@
 <?php
+/** @noinspection SqlNoDataSourceInspection */
 
 namespace Abivia\Geocode\CacheHandler;
 
-use Abivia\Geocode\CacheHandler\CacheHandler;
+use Abivia\Geocode\Geocoder;
 use Abivia\Geocode\GeocodeResult\GeocodeResult;
 use IPLib\Address\AddressInterface;
 use PDO;
-use PDOException;
 
 class PdoCache extends AbstractCache implements CacheHandler
 {
@@ -25,7 +25,7 @@ class PdoCache extends AbstractCache implements CacheHandler
      * @param string|null $dbSubnetTable Name of the subnet mapping table, if it is to be overridden.
      * @param string|null $dbOptionsTable Name of a table for storing configuration, if it is to be overridden.
      * @param array|null $dbOptions Options to be added when creating a table, indexed by database
-     *                  connection type (eg. for mysql: to specify engine, charset, collate)
+     *                  connection type (e.g. for mysql: to specify engine, charset, collate)
      */
     public function __construct(
         PDO $db,
@@ -96,7 +96,7 @@ class PdoCache extends AbstractCache implements CacheHandler
         }
         if (
             $fetchStatement->execute([
-                ':subnet' => $this->subnetAddress($address),
+                ':subnet' => Geocoder::getSubnetAddress($address),
                 ':stale' => time(),
             ])
         ) {
@@ -157,7 +157,7 @@ class PdoCache extends AbstractCache implements CacheHandler
             $lastQuery->execute([':key' => 'last_ip_purge_time']);
             $lastPurge = $lastQuery->fetchColumn();
 
-            // If there's still no last purge time, create it and it set to zero
+            // If there's still no last purge time, create it, and it set to zero
             if ($lastPurge === false) {
                 $this->db->query(
                     "INSERT INTO `$this->dbOptionsTable` (`key`,`value`)"
@@ -210,7 +210,7 @@ class PdoCache extends AbstractCache implements CacheHandler
         ]);
         if ($serial) {
             $subUp->execute([
-                ':subnet' => $this->subnetAddress($address),
+                ':subnet' => Geocoder::getSubnetAddress($address),
                 ':mapped' => $fullAddress,
             ]);
         }

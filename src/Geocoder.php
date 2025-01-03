@@ -9,6 +9,7 @@ use Abivia\Geocode\GeocodeResult\GeocodeResult;
 use Abivia\Geocode\LookupService\LookupService;
 use InvalidArgumentException;
 use IPLib\Address\AddressInterface;
+use IPLib\Address\IPv4;
 use IPLib\Factory as IpAddressFactory;
 
 /**
@@ -36,7 +37,7 @@ class Geocoder
     protected AddressInterface|null $ipAddress = null;
 
     /**
-     * @param string|LookupService $service
+     * @param LookupService $service
      * @param CacheHandler|null $cache
      */
     public function __construct(LookupService $service, CacheHandler $cache = null)
@@ -88,6 +89,22 @@ class Geocoder
     public function getApiService(): LookupService
     {
         return $this->apiService;
+    }
+
+    /**
+     * Get the subnet address from a full address.
+     * @param AddressInterface $address The full address.
+     * @return string The subnet part of the address.
+     */
+    static public function getSubnetAddress(AddressInterface $address): string
+    {
+        $fullAddress = $address->getComparableString();
+        if ($address instanceof IPv4) {
+            $subnet = substr($fullAddress, 0, 11);
+        } else {
+            $subnet = substr($fullAddress, 0, 14);
+        }
+        return $subnet;
     }
 
     /**

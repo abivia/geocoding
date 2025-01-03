@@ -25,7 +25,7 @@ class FileCache extends ArrayCache implements CacheHandler
         $this->saveCache();
     }
 
-    private function loadCache()
+    private function loadCache(): void
     {
         if (file_exists($this->cacheFile)) {
             $cacheInfo = json_decode(file_get_contents($this->cacheFile));
@@ -42,7 +42,7 @@ class FileCache extends ArrayCache implements CacheHandler
         }
     }
 
-    private function purgeExpiredCache()
+    private function purgeExpiredCache(): void
     {
         $now = time();
         foreach ($this->cache as $key => $entry) {
@@ -57,7 +57,7 @@ class FileCache extends ArrayCache implements CacheHandler
         }
     }
 
-    private function saveCache()
+    private function saveCache(): void
     {
         $cacheInfo = [
             'cache' => serialize($this->cache),

@@ -1,5 +1,10 @@
 # Change log
 
+# 2.5.0
+
+Added:
+* `Geocoder::getSubnetAddress()` method by extracting code from `AbstractCache::subnetAddress()`.
+
 # 2.4.1
 
 Fixed:

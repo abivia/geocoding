@@ -2,9 +2,9 @@
 
 namespace Abivia\Geocode\CacheHandler;
 
+use Abivia\Geocode\Geocoder;
 use Abivia\Geocode\GeocodeResult\GeocodeResult;
 use IPLib\Address\AddressInterface;
-use IPLib\Address\IPv4;
 
 abstract class AbstractCache implements CacheHandler
 {
@@ -97,13 +97,7 @@ abstract class AbstractCache implements CacheHandler
      */
     protected function subnetAddress(AddressInterface $address): string
     {
-        $fullAddress = $address->getComparableString();
-        if ($address instanceof IPv4) {
-            $subnet = substr($fullAddress, 0, 11);
-        } else {
-            $subnet = substr($fullAddress, 0, 14);
-        }
-        return $subnet;
+        return Geocoder::getSubnetAddress($address);
     }
 
 }
