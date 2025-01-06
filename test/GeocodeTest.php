@@ -47,6 +47,13 @@ class GeocodeTest extends TestCase
         $this->assertNotNull($result);
         $this->assertEquals('CA', $result->getCountryCode());
         $this->assertEquals('148.170.126.209', $result->getIpAddress());
+
+        // Check the bad actor case
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = 'I am an asshole';
+        $result = $this->testObj->lookupHttp();
+        $this->assertNotNull($result);
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('67.61.113.220', $result->getIpAddress());
     }
 
     public function testLookupHttpNoServer()

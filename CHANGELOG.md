@@ -1,5 +1,12 @@
 # Change log
 
+# 2.5.1
+
+Fixed:
+* To circumvent hacker abuse, `GeoCoder::getAddressFromHttp()`
+  now falls back to using the server's `REMOTE_ADDR` when a value for `HTTP_X_FORWARDED_FOR`
+  is provided but is not a valid address.
+
 # 2.5.0
 
 Added:
@@ -48,7 +55,7 @@ Added:
 Changed:
 * Updated getter methods for compatibility with abivia/cogs 2.0
 
-## 1.0.1 2022-08-11
+# 1.0.1 2022-08-11
 
 Fixed:
 * Error in ipinfo.io URL.
