@@ -1,6 +1,7 @@
 <?php
 
 
+use Abivia\Geocode\AddressNotFoundException;
 use Abivia\Geocode\Geocoder;
 use PHPUnit\Framework\TestCase;
 
@@ -47,8 +48,12 @@ class GeocodeTest extends TestCase
         $this->assertNotNull($result);
         $this->assertEquals('CA', $result->getCountryCode());
         $this->assertEquals('148.170.126.209', $result->getIpAddress());
+    }
 
+    public function testLookupHttpBadForward()
+    {
         // Check the bad actor case
+        $_SERVER['REMOTE_ADDR'] = '67.61.113.220';
         $_SERVER['HTTP_X_FORWARDED_FOR'] = 'I am an asshole';
         $result = $this->testObj->lookupHttp();
         $this->assertNotNull($result);
@@ -56,9 +61,20 @@ class GeocodeTest extends TestCase
         $this->assertEquals('67.61.113.220', $result->getIpAddress());
     }
 
+    public function testLookupHttpNoForward()
+    {
+        // Check the bad actor case
+        $_SERVER['REMOTE_ADDR'] = '67.61.113.220';
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = '148.170.126.209';
+        $result = $this->testObj->lookupHttp(false);
+        $this->assertNotNull($result);
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('67.61.113.220', $result->getIpAddress());
+    }
+
     public function testLookupHttpNoServer()
     {
-        $this->expectException(\Abivia\Geocode\AddressNotFoundException::class);
+        $this->expectException(AddressNotFoundException::class);
         unset($_SERVER['REMOTE_ADDR']);
         unset($_SERVER['HTTP_X_FORWARDED_FOR']);
         $this->testObj->lookupHttp();

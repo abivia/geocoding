@@ -1,5 +1,13 @@
 # Change log
 
+# 2.6.0
+
+Added:
+* `GeoCoder::getAddressFromHttp()` and `GeoCoder::lookupHttp()` now have an optional
+  `$allowForward` parameter that can be used to ignore a `HTTP_X_FORWARDED_FOR` header.
+  The parameter defaults true, but can be set false to ignore a correctly formatted,
+  but obviously bogus address.
+
 # 2.5.1
 
 Fixed:

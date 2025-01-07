@@ -66,14 +66,15 @@ class Geocoder
     /**
      * Attempt to get an IP address from the current HTTP request.
      *
+     * @param bool $allowForward
      * @return AddressInterface
      * @throws AddressNotFoundException
      */
-    public static function getAddressFromHttp(): AddressInterface
+    public static function getAddressFromHttp(bool $allowForward = true): AddressInterface
     {
         $source = null;
         $ipAddress = null;
-        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        if ($allowForward && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $source = htmlspecialchars($_SERVER['HTTP_X_FORWARDED_FOR']);
             $ipAddress = IpAddressFactory::parseAddressString($source);
         }
@@ -137,12 +138,13 @@ class Geocoder
     /**
      * Do a lookup based on the current HTTP request.
      *
+     * @param bool $allowForward
      * @return  GeocodeResult|null
      * @throws AddressNotFoundException
      */
-    public function lookupHttp(): ?GeocodeResult
+    public function lookupHttp(bool $allowForward = true): ?GeocodeResult
     {
-        $this->ipAddress = static::getAddressFromHttp();
+        $this->ipAddress = static::getAddressFromHttp($allowForward);
         return $this->lookup();
     }
 
