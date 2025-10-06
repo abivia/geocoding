@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Abivia\Geocode\LookupService;
 
 use Abivia\Geocode\GeocodeResult\IpStackResult;
+use Abivia\Geocode\LookupFailedException;
 use function curl_close;
 use function curl_exec;
 use function curl_init;
@@ -44,6 +45,7 @@ class IpStackApi implements LookupService
      *
      * @param string $address A v4 or v6 IP address.
      * @return array|null
+     * @throws LookupFailedException
      */
     public function query(string $address): ?IpStackResult
     {
@@ -53,7 +55,14 @@ class IpStackApi implements LookupService
         $json = curl_exec($channel);
         curl_close($channel);
         if (is_string($json)) {
-            return new IpStackResult(json_decode($json, true));
+            $response = json_decode($json, true);
+            if ($response === null) {
+                throw new LookupFailedException("Response was not valid JSON.");
+            }
+            if ($response['error'] ?? false) {
+                throw new LookupFailedException("{$response['type']}: {$response['info']}");
+            }
+            return new IpStackResult($response);
         }
         return null;
     }

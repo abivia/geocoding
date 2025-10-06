@@ -6,12 +6,10 @@ namespace Abivia\Geocode\GeocodeResult;
 /**
  * Container for a result returned by ipinfo.io.
  */
-class IpInfoResult implements GeocodeResult
+class IpApiResult implements GeocodeResult
 {
     private ?array $data;
     private bool $fromCache = false;
-    protected ?float $latitude;
-    protected ?float $longitude;
 
     public function __construct(?array $data)
     {
@@ -47,7 +45,7 @@ class IpInfoResult implements GeocodeResult
      */
     public function getAdministrativeArea(): ?string
     {
-        return $this->data['region'] ?? null;
+        return $this->data['region'] ?? ($this->data['region_name'] ??null);
     }
 
     /**
@@ -55,7 +53,7 @@ class IpInfoResult implements GeocodeResult
      */
     public function getAdministrativeAreaCode(): ?string
     {
-        return null;
+        return $this->data['region_code'] ?? null;
     }
 
     /**
@@ -63,7 +61,7 @@ class IpInfoResult implements GeocodeResult
      */
     public function getCountry(): ?string
     {
-        return $this->data['country'] ?? null;
+        return $this->data['country_name'] ?? null;
     }
 
     /**
@@ -71,7 +69,7 @@ class IpInfoResult implements GeocodeResult
      */
     public function getCountryCode(): ?string
     {
-        return $this->data['country'] ?? null;
+        return $this->data['country_code'] ?? null;
     }
 
     public function getData(): ?array
@@ -94,10 +92,7 @@ class IpInfoResult implements GeocodeResult
 
     public function getLatitude(): ?float
     {
-        if (!isset($this->latitude)) {
-            $this->parseLoc();
-        }
-        return $this->latitude;
+        return $this->data['latitude'] ?? null;
     }
 
     /**
@@ -105,7 +100,7 @@ class IpInfoResult implements GeocodeResult
      */
     public function getLocale(): ?string
     {
-        return 'en-US';
+        return $this->data['languages'] ?? null;
     }
 
     /**
@@ -118,10 +113,7 @@ class IpInfoResult implements GeocodeResult
 
     public function getLongitude(): ?float
     {
-        if (!isset($this->longitude)) {
-            $this->parseLoc();
-        }
-        return $this->longitude;
+        return $this->data['longitude'] ?? null;
     }
 
     /**
@@ -129,7 +121,7 @@ class IpInfoResult implements GeocodeResult
      */
     public function getPostalCode(): ?string
     {
-        return $this->data['postal'] ?? null;
+        return $this->data['postal'] ?? ($this->data['zip'] ?? null);
     }
 
     /**
@@ -137,24 +129,12 @@ class IpInfoResult implements GeocodeResult
      */
     public function getSortingCode(): ?string
     {
-        return $this->data['postal'] ?? null;
+        return $this->data['postal'] ?? ($this->data['zip'] ?? null);
     }
 
     public function getTimezone(): ?string
     {
         return $this->data['timezone'] ?? null;
-    }
-
-    private function parseLoc()
-    {
-        if (isset($this->data['loc'])) {
-            $parts = explode(',', $this->data['loc']);
-            $this->latitude = (float)trim($parts[0]);
-            $this->longitude = (float)trim($parts[1]);
-        } else {
-            $this->latitude = null;
-            $this->longitude = null;
-        }
     }
 
 }

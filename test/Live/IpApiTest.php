@@ -2,21 +2,21 @@
 
 
 use Abivia\Geocode\Geocoder;
-use Abivia\Geocode\LookupService\IpInfoApi;
+use Abivia\Geocode\LookupService\IpApiApi;
 use PHPUnit\Framework\TestCase;
 
 
-class IpInfoTest extends TestCase
+class IpApiTest extends TestCase
 {
     public function testLookup()
     {
-        $keyFile = __DIR__ . '/../../.ipinfo-key';
+        $keyFile = __DIR__ . '/../../.ipapi-key';
         if (file_exists($keyFile)) {
             $key = trim(file_get_contents($keyFile));
         } else {
             $key = '';
         }
-        $geocoder = new Geocoder(IpInfoApi::make($key));
+        $geocoder = new Geocoder(IpApiApi::make($key));
         $result = $geocoder->lookup('173.239.198.14');
         $this->assertNotNull($result);
         $expected = json_decode(
@@ -24,12 +24,6 @@ class IpInfoTest extends TestCase
             true
         );
         foreach ($expected['exact'] as $method => $value) {
-            if (
-                $method === 'getAdministrativeAreaCode'
-                || $method === 'getCountry'
-            ) {
-                continue;
-            }
             $this->assertEquals($value, $result->$method(), $method);
         }
         foreach ($expected['close'] as $method => $value) {
@@ -41,6 +35,7 @@ class IpInfoTest extends TestCase
         foreach ($expected['starts'] as $method => $value) {
             $this->assertStringStartsWith($value, $result->$method(), $method);
         }
+
     }
 
 }

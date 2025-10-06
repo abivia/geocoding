@@ -1,7 +1,13 @@
 # Abivia Geocoding
 
-The Abivia geocoding library provides a caching interface to IP address lookup APIs provided by
-ipinfo.io and ipstack.com. The library supports both IPv4 and IPv6 addresses and is designed to
+The Abivia geocoding library provides a caching interface to IP address lookup APIs
+from these sources:
+
+- ipinfo.io 
+- ipstack.com
+- ipapi.co
+
+The library supports both IPv4 and IPv6 addresses and is designed to
 seamlessly support other IP address geocoding services.
 
 ## Requirements

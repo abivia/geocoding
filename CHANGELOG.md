@@ -1,5 +1,15 @@
 # Change log
 
+# 3.0.0
+
+Fixed:
+* A deprecation warning with PHP 8.4.
+
+Added:
+* ipapi.co as a geo-location provider.
+* If there is an error with the provider (bad key, invalid response), a `LookupFailedException`
+is now thrown.
+
 # 2.6.0
 
 Added:

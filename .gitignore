@@ -5,3 +5,10 @@
 /.ipstack-key
 /test/CacheHandler/filecache.json
 /test/CacheHandler/pdo.sqlite
+/.ipapi-key
+/.ipinfo-key
+/test/test-php82.txt
+/test/test-php83.txt
+/test/test-php84.txt
+/test/test-php-versions.bat
+/test/.phpunit.result.cache

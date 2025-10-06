@@ -40,7 +40,7 @@ class Geocoder
      * @param LookupService $service
      * @param CacheHandler|null $cache
      */
-    public function __construct(LookupService $service, CacheHandler $cache = null)
+    public function __construct(LookupService $service, ?CacheHandler $cache = null)
     {
         $this->apiService = $service;
         $this->cache = $cache ?? new ArrayCache();
@@ -119,7 +119,7 @@ class Geocoder
      * @return GeocodeResult|null
      * @throws InvalidArgumentException
      */
-    public function lookup(string $address = null): ?GeocodeResult
+    public function lookup(?string $address = null): ?GeocodeResult
     {
         if ($address !== null) {
             $this->address($address);
@@ -148,7 +148,7 @@ class Geocoder
         return $this->lookup();
     }
 
-    public function lookupSubnet(string $address = null): ?GeocodeResult
+    public function lookupSubnet(?string $address = null): ?GeocodeResult
     {
         if ($address !== null) {
             $this->address($address);

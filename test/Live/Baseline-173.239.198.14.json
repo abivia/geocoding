@@ -1,0 +1,22 @@
+{
+  "exact": {
+    "getAdministrativeArea": "California",
+    "getAdministrativeAreaCode": "CA",
+    "getCountry": "United States",
+    "getCountryCode": "US",
+    "getIpAddress": "173.239.198.14",
+    "getLocality": "San Francisco",
+    "getTimezone": "America/Los_Angeles"
+  },
+  "close": {
+    "getLatitude": 37.7813,
+    "getLongitude": -122.4167
+  },
+  "includes": {
+    "getLocale": "en-US"
+  },
+  "starts": {
+    "getPostalCode": "94102",
+    "getSortingCode": "94102"
+  }
+}
