@@ -57,7 +57,8 @@ class IpApiApi implements LookupService
                 throw new LookupFailedException("Response was not valid JSON.");
             }
             if ($response['error'] ?? false) {
-                throw new LookupFailedException("{$response['reason']}: {$response['message']}");
+                $message = $response['message'] ?? '';
+                throw new LookupFailedException("{$response['reason']} $message");
             }
             return new IpApiResult($response);
         }

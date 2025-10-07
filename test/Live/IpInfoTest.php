@@ -1,7 +1,8 @@
 <?php
-
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Abivia\Geocode\Geocoder;
+use Abivia\Geocode\LookupFailedException;
 use Abivia\Geocode\LookupService\IpInfoApi;
 use PHPUnit\Framework\TestCase;
 
@@ -41,6 +42,21 @@ class IpInfoTest extends TestCase
         foreach ($expected['starts'] as $method => $value) {
             $this->assertStringStartsWith($value, $result->$method(), $method);
         }
+    }
+
+    public function testLookupLocalhost()
+    {
+        $keyFile = __DIR__ . '/../../.ipinfo-key';
+        if (file_exists($keyFile)) {
+            $key = trim(file_get_contents($keyFile));
+        } else {
+            $key = '';
+        }
+        $geocoder = new Geocoder(IpInfoApi::make($key));
+
+        $result = $geocoder->lookup('127.0.0.1');
+        $this->assertNotNull($result);
+        $this->assertEquals(null, $result->getCountryCode());
     }
 
 }

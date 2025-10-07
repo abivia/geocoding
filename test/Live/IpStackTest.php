@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Abivia\Geocode\Geocoder;
 use Abivia\Geocode\LookupService\IpStackApi;
@@ -10,7 +11,7 @@ class IpStackTest extends TestCase
 {
     public function testLookup()
     {
-        $keyfile = dirname(dirname(__DIR__)) . '/.ipstack-key';
+        $keyfile = __DIR__ . '/../../.ipstack-key';
         if (!file_exists($keyfile)) {
             $this->fail("$keyfile file not found.");
         }
@@ -41,6 +42,21 @@ class IpStackTest extends TestCase
         //foreach ($expected['starts'] as $method => $value) {
         //    $this->assertStringStartsWith($value, $result->$method(), $method);
         //}
+    }
+
+    public function testLookupLocalhost()
+    {
+        $keyFile = __DIR__ . '/../../.ipstack-key';
+        if (file_exists($keyFile)) {
+            $key = trim(file_get_contents($keyFile));
+        } else {
+            $key = '';
+        }
+        $geocoder = new Geocoder(IpStackApi::make($key));
+
+        $result = $geocoder->lookup('127.0.0.1');
+        $this->assertNotNull($result);
+        $this->assertEquals(null, $result->getCountryCode());
     }
 
 }
