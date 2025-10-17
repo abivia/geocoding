@@ -44,6 +44,7 @@ class Geocoder
     {
         $this->apiService = $service;
         $this->cache = $cache ?? new ArrayCache();
+
     }
 
     /**
@@ -66,20 +67,24 @@ class Geocoder
     /**
      * Attempt to get an IP address from the current HTTP request.
      *
-     * @param bool $allowForward
+     * @param bool $allowForward If set, the X_FORWARDED_FOR header can provide the address.
+     * @param array|null $server Server environment, if not set, then $_SERVER is used.
      * @return AddressInterface
      * @throws AddressNotFoundException
      */
-    public static function getAddressFromHttp(bool $allowForward = true): AddressInterface
-    {
+    public static function getAddressFromHttp(
+        bool $allowForward = true,
+        ?array $server = null
+    ): AddressInterface {
+        $server ??= $_SERVER;
         $source = null;
         $ipAddress = null;
-        if ($allowForward && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $source = htmlspecialchars($_SERVER['HTTP_X_FORWARDED_FOR']);
+        if ($allowForward && isset($server['HTTP_X_FORWARDED_FOR'])) {
+            $source = htmlspecialchars($server['HTTP_X_FORWARDED_FOR']);
             $ipAddress = IpAddressFactory::parseAddressString($source);
         }
-        if ($ipAddress === null && isset($_SERVER['REMOTE_ADDR'])) {
-            $source = htmlspecialchars($_SERVER['REMOTE_ADDR']);
+        if ($ipAddress === null && isset($server['REMOTE_ADDR'])) {
+            $source = htmlspecialchars($server['REMOTE_ADDR']);
             $ipAddress = IpAddressFactory::parseAddressString($source);
         }
         if ($source === null) {

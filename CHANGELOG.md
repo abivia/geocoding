@@ -1,5 +1,10 @@
 # Change log
 
+### 3.1.0
+Added:
+* A `server` argument to `getAddressFromHttp` that can be used to override the default
+use of the `$_SERVER` superglobal.
+
 ### 3.0.1
 Fixed:
 * ipapi.co returns an error with a reason but no message when the IP address is a bogon,
