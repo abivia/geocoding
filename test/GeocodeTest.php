@@ -39,7 +39,7 @@ class GeocodeTest extends TestCase
 
     public function testLookupHttp()
     {
-        $_SERVER['REMOTE_ADDR'] = '67.61.113.220';
+        $_SERVER = ['REMOTE_ADDR' => '67.61.113.220'];
         $result = $this->testObj->lookupHttp();
         $this->assertNotNull($result);
         $this->assertEquals('US', $result->getCountryCode());
@@ -49,13 +49,49 @@ class GeocodeTest extends TestCase
         $this->assertNotNull($result);
         $this->assertEquals('CA', $result->getCountryCode());
         $this->assertEquals('148.170.126.209', $result->getIpAddress());
+        $result = $this->testObj->lookupHttp(false);
+        $this->assertNotNull($result);
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('67.61.113.220', $result->getIpAddress());
+    }
+
+    public function testLookupHttpViaProxy()
+    {
+        $_SERVER = ['REMOTE_ADDR' => '67.61.113.220'];
+        $result = $this->testObj->lookupHttp();
+        $this->assertNotNull($result);
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('67.61.113.220', $result->getIpAddress());
+
+        // Add a nonstandard proxy header, expect it to not get picked up.
+        $_SERVER['HTTP_CLIENT_IP'] = '148.170.126.209';
+        $result = $this->testObj->lookupHttp();
+        $this->assertNotNull($result);
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('67.61.113.220', $result->getIpAddress());
+
+        // Now add the known proxy headers and expect the proxy to be picked up.
+        $this->testObj->addKnownProxyHeaders();
+        $result = $this->testObj->lookupHttp();
+        $this->assertNotNull($result);
+        $this->assertEquals('CA', $result->getCountryCode());
+        $this->assertEquals('148.170.126.209', $result->getIpAddress());
+
+        // Lastly, delete the header we used and expect the proxy to be ignored.
+        $this->testObj->removeProxyHeader('HTTP_CLIENT_IP');
+        $result = $this->testObj->lookupHttp();
+        $this->assertNotNull($result);
+        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('67.61.113.220', $result->getIpAddress());
     }
 
     public function testLookupHttpBadForward()
     {
         // Check the bad actor case
-        $_SERVER['REMOTE_ADDR'] = '67.61.113.220';
-        $_SERVER['HTTP_X_FORWARDED_FOR'] = 'I am an asshole';
+        $_SERVER = [
+            'REMOTE_ADDR' => '67.61.113.220',
+            'HTTP_X_FORWARDED_FOR' => 'I am an asshole'
+        ];
         $result = $this->testObj->lookupHttp();
         $this->assertNotNull($result);
         $this->assertEquals('US', $result->getCountryCode());
@@ -65,8 +101,10 @@ class GeocodeTest extends TestCase
     public function testLookupHttpNoForward()
     {
         // Check the bad actor case
-        $_SERVER['REMOTE_ADDR'] = '67.61.113.220';
-        $_SERVER['HTTP_X_FORWARDED_FOR'] = '148.170.126.209';
+        $_SERVER = [
+            'REMOTE_ADDR' => '67.61.113.220',
+            'HTTP_X_FORWARDED_FOR' => '148.170.126.209'
+        ];
         $result = $this->testObj->lookupHttp(false);
         $this->assertNotNull($result);
         $this->assertEquals('US', $result->getCountryCode());
@@ -75,9 +113,8 @@ class GeocodeTest extends TestCase
 
     public function testLookupHttpNoServer()
     {
+        $_SERVER = [];
         $this->expectException(AddressNotFoundException::class);
-        unset($_SERVER['REMOTE_ADDR']);
-        unset($_SERVER['HTTP_X_FORWARDED_FOR']);
         $this->testObj->lookupHttp();
     }
 

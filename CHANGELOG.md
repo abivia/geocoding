@@ -1,5 +1,9 @@
 # Change log
 
+### 3.2.0
+Added:
+* More flexible recognition of proxies. See the proxy section of the readme for more info.
+
 ### 3.1.0
 Added:
 * A `server` argument to `getAddressFromHttp` that can be used to override the default

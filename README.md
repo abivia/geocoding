@@ -53,6 +53,24 @@ The PDO cache runs at the interval set by the `purgeCacheTime()` method, which d
 On the first object creation, 
 the last purge time is loaded from the database and cached in the session to reduce overhead.
 
+### Proxy headers
+
+The static `getAddressFromHttp()` method now accepts an optional `$proxyHeaders`
+parameter. If the parameter is null or not provided, and `allowHeaders` is true,
+GeoCoder looks for `HTTP_CF_CONNECTING_IP`, `HTTP_CLIENT_IP`,
+and `HTTP_X_FORWARDED_FOR` headers, 
+in that order (more proxies may be added as they are discovered).
+A `GeoCoder` instance can maintain an independent proxy list.
+
+By default, and address lookup via `Geocoder::lookupHttp()` checks for the `HTTP_X_FORWARDED_FOR`
+header. However, other services such as CloudFlare use non-standard headers. A call to
+`Geocoder::addKnownProxyHeaders()` adds all known proxy headers,
+which are checked for an IP address in order until a valid address is found.
+
+Other proxies can be added or removed by calling `Geocoder::addProxyHeader()` 
+and `Geocoder::removeProxyHeader()`. Header names are converted to uppercase. Headers are checked 
+in the reverse order that they are added, so that the most recently added header is checked first.
+
 ## Sample Usage
 
 ```php

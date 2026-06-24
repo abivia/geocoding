@@ -36,6 +36,16 @@ class Geocoder
      */
     protected AddressInterface|null $ipAddress = null;
 
+    protected static array $knownProxyHeaders = [
+        'HTTP_CF_CONNECTING_IP',
+        'HTTP_CLIENT_IP',
+        'HTTP_X_FORWARDED_FOR',
+    ];
+
+    protected array $proxyList = [
+        'HTTP_X_FORWARDED_FOR',
+    ];
+
     /**
      * @param LookupService $service
      * @param CacheHandler|null $cache
@@ -45,6 +55,22 @@ class Geocoder
         $this->apiService = $service;
         $this->cache = $cache ?? new ArrayCache();
 
+    }
+
+    public function addProxyHeader(string $headerName): self
+    {
+        $headerName = strtoupper($headerName);
+        $this->removeProxyHeader($headerName);
+        array_unshift($this->proxyList, $headerName);
+        return $this;
+    }
+
+    public function addKnownProxyHeaders(): self
+    {
+        foreach (array_reverse(self::$knownProxyHeaders) as $headerName) {
+            $this->addProxyHeader($headerName);
+        }
+        return $this;
     }
 
     /**
@@ -69,19 +95,28 @@ class Geocoder
      *
      * @param bool $allowForward If set, the X_FORWARDED_FOR header can provide the address.
      * @param array|null $server Server environment, if not set, then $_SERVER is used.
+     * @param array|null $ProxyHeaders A list of proxy client headers to check.
      * @return AddressInterface
      * @throws AddressNotFoundException
      */
     public static function getAddressFromHttp(
         bool $allowForward = true,
-        ?array $server = null
+        ?array $server = null,
+        ?array $ProxyHeaders = null,
     ): AddressInterface {
         $server ??= $_SERVER;
         $source = null;
         $ipAddress = null;
-        if ($allowForward && isset($server['HTTP_X_FORWARDED_FOR'])) {
-            $source = htmlspecialchars($server['HTTP_X_FORWARDED_FOR']);
-            $ipAddress = IpAddressFactory::parseAddressString($source);
+        if ($allowForward ) {
+            foreach ($ProxyHeaders ?? self::$knownProxyHeaders as $headerName) {
+                if (isset($server[$headerName])) {
+                    $source = htmlspecialchars($server[$headerName]);
+                    $ipAddress = IpAddressFactory::parseAddressString($source);
+                    if ($ipAddress !== null) {
+                        break;
+                    }
+                }
+            }
         }
         if ($ipAddress === null && isset($server['REMOTE_ADDR'])) {
             $source = htmlspecialchars($server['REMOTE_ADDR']);
@@ -149,7 +184,7 @@ class Geocoder
      */
     public function lookupHttp(bool $allowForward = true): ?GeocodeResult
     {
-        $this->ipAddress = static::getAddressFromHttp($allowForward);
+        $this->ipAddress = static::getAddressFromHttp($allowForward, ProxyHeaders: $this->proxyList);
         return $this->lookup();
     }
 
@@ -167,6 +202,16 @@ class Geocoder
             }
         }
         return $this->geoData;
+    }
+
+    public function removeProxyHeader(string $headerName): self
+    {
+        $headerName = strtoupper($headerName);
+        $index = array_search($headerName, $this->proxyList);
+        if ($index !== false) {
+            unset($this->proxyList[$index]);
+        }
+        return $this;
     }
 
 }
