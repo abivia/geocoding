@@ -3,6 +3,7 @@
          bootstrap="../vendor/autoload.php"
          colors="true"
          displayDetailsOnAllIssues="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
 >
     <testsuites>
         <testsuite name="unit">

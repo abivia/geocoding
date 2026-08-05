@@ -10,14 +10,19 @@ use PHPUnit\Framework\TestCase;
 
 class IpApiTest extends TestCase
 {
-    public function testLookup()
-    {
+    protected function getConfig(): array {
         $keyFile = __DIR__ . '/../../.ipapi-key';
         if (file_exists($keyFile)) {
-            $key = trim(file_get_contents($keyFile));
+            $key = json_decode(file_get_contents($keyFile), true);
         } else {
-            $key = '';
+            $key = [];
         }
+        return $key;
+    }
+
+    public function testLookup()
+    {
+        $key = $this->getConfig();
         $geocoder = new Geocoder(IpApiApi::make($key));
         $result = $geocoder->lookup('173.239.198.14');
         $this->assertNotNull($result);
@@ -42,12 +47,7 @@ class IpApiTest extends TestCase
 
     public function testLookupLocalhost()
     {
-        $keyFile = __DIR__ . '/../../.ipapi-key';
-        if (file_exists($keyFile)) {
-            $key = trim(file_get_contents($keyFile));
-        } else {
-            $key = '';
-        }
+        $key = $this->getConfig();
         $geocoder = new Geocoder(IpApiApi::make($key));
         $this->expectException(LookupFailedException::class);
         $result = $geocoder->lookup('127.0.0.1');

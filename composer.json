@@ -15,24 +15,18 @@
   ],
   "license": "MIT",
   "require": {
-    "php": "^8.2",
+    "php": "^8.4|^8.5",
     "ext-curl": "*",
     "abivia/cogs": "^2",
     "mlocati/ip-lib": "^1",
-    "ext-pdo": "*"
+    "nesbot/carbon": "^3",
+    "symfony/cache": "^8.1"
   },
   "autoload": {
     "psr-4": {
       "Abivia\\Geocode\\": "src/"
     }
   },
-  "repositories": [
-    {
-      "type": "path",
-      "url": "../cogs",
-      "canonical": false
-    }
-  ],
   "config": {
     "optimize-autoloader": true,
     "preferred-install": "dist",

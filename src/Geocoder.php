@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Abivia\Geocode;
 
-use Abivia\Geocode\CacheHandler\ArrayCache;
-use Abivia\Geocode\CacheHandler\CacheHandler;
 use Abivia\Geocode\GeocodeResult\GeocodeResult;
 use Abivia\Geocode\LookupService\LookupService;
 use InvalidArgumentException;
@@ -23,14 +21,12 @@ class Geocoder
      * @var LookupService Service to query the IPStack API.
      */
     protected LookupService $apiService;
-    /**
-     * @var CacheHandler Lookup cache.
-     */
-    protected CacheHandler $cache;
+
     /**
      * @var GeocodeResult|null Result from a lookup on IP address
      */
     protected ?GeocodeResult $geoData;
+
     /**
      * @var AddressInterface|null The current IP address
      */
@@ -48,15 +44,17 @@ class Geocoder
 
     /**
      * @param LookupService $service
-     * @param CacheHandler|null $cache
      */
-    public function __construct(LookupService $service, ?CacheHandler $cache = null)
+    public function __construct(LookupService $service)
     {
         $this->apiService = $service;
-        $this->cache = $cache ?? new ArrayCache();
-
     }
 
+    /**
+     * Add a custom proxy header by name.
+     * @param string $headerName
+     * @return $this
+     */
     public function addProxyHeader(string $headerName): self
     {
         $headerName = strtoupper($headerName);
@@ -65,6 +63,10 @@ class Geocoder
         return $this;
     }
 
+    /**
+     * Add commonly used proxy headers to the known proxy list.
+     * @return $this
+     */
     public function addKnownProxyHeaders(): self
     {
         foreach (array_reverse(self::$knownProxyHeaders) as $headerName) {
@@ -164,14 +166,7 @@ class Geocoder
         if ($address !== null) {
             $this->address($address);
         }
-        $this->geoData = $this->cache->get($this->ipAddress);
-        if ($this->geoData === null) {
-            $apiData = $this->apiService->query($this->ipAddress->toString());
-            if ($apiData !== null) {
-                $this->geoData = $apiData;
-                $this->cache->set($this->ipAddress, $this->geoData);
-            }
-        }
+        $this->geoData = $this->apiService->query($this->ipAddress->toString());
         return $this->geoData;
     }
 
@@ -188,22 +183,26 @@ class Geocoder
         return $this->lookup();
     }
 
+    /**
+     * Lookup the /24 subnet of an IP address, or the /48 of an IPv6 address.
+     * @param string|null $address
+     * @return GeocodeResult|null
+     */
     public function lookupSubnet(?string $address = null): ?GeocodeResult
     {
         if ($address !== null) {
             $this->address($address);
         }
-        $this->geoData = $this->cache->getSubnet($this->ipAddress);
-        if ($this->geoData === null) {
-            $apiData = $this->apiService->query($this->ipAddress->toString());
-            if ($apiData !== null) {
-                $this->geoData = $apiData;
-                $this->cache->set($this->ipAddress, $this->geoData);
-            }
-        }
+        $subNet = self::getSubnetAddress($this->ipAddress);
+        $this->geoData = $this->apiService->query($subNet);
         return $this->geoData;
     }
 
+    /**
+     * Remove a header from the list of proxy headers.
+     * @param string $headerName
+     * @return $this
+     */
     public function removeProxyHeader(string $headerName): self
     {
         $headerName = strtoupper($headerName);

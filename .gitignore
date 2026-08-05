@@ -12,3 +12,5 @@
 /test/test-php84.txt
 /test/test-php-versions.bat
 /test/.phpunit.result.cache
+/CLAUDE.md
+/.claude/

@@ -4,8 +4,9 @@ namespace Abivia\Geocode\LookupService;
 
 use Abivia\Geocode\GeocodeResult\IpApiResult;
 use Abivia\Geocode\LookupFailedException;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 
-class IpApiApi implements LookupService
+class IpApiApi extends AbstractService implements LookupService
 {
     /**
      * @var string API access token
@@ -18,16 +19,12 @@ class IpApiApi implements LookupService
     protected string $baseUrl = 'https://ipapi.co/';
 
     /**
-     * @param string $accessKey
+     * @param array $config
      */
-    public function __construct(string $accessKey = '')
+    public function __construct(array $config = [])
     {
-        $this->accessKey = $accessKey;
-    }
-
-    public static function make(string $accessKey = ''): static
-    {
-        return new static($accessKey);
+        parent::__construct($config);
+        $this->accessKey = $config['key'] ?? '';
     }
 
     /**
@@ -37,7 +34,7 @@ class IpApiApi implements LookupService
      * @return array|null
      * @throws LookupFailedException
      */
-    public function query(string $address): ?IpApiResult
+    public function queryCore(string $address): ?IpApiResult
     {
         if ($this->accessKey !== '') {
             $url = "$this->baseUrl$address/json?"
@@ -47,12 +44,12 @@ class IpApiApi implements LookupService
         } else {
             $url = "$this->baseUrl$address/json";
         }
-        $channel = curl_init($url);
-        curl_setopt($channel, CURLOPT_RETURNTRANSFER, true);
-        $json = curl_exec($channel);
-        curl_close($channel);
-        if (is_string($json)) {
-            $response = json_decode($json, true);
+        $this->providerLookup($url);
+        if ($this->lookupHttpCode !== 200) {
+            throw new LookupFailedException("HTTP Error on request $this->lookupHttpCode");
+        }
+        if (is_string($this->lookupResult)) {
+            $response = json_decode($this->lookupResult, true);
             if ($response === null) {
                 throw new LookupFailedException("Response was not valid JSON.");
             }

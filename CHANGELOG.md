@@ -1,5 +1,14 @@
 # Change log
 
+### 4.0.0
+Breaking Changes:
+* Dropped PHP <= 8.3
+* Removed native caching, replaced with symfony's cache system.
+* Added graceful fallback for multiple ipinfo APIs (eg. lite to free).
+
+Other changes:
+* Data from all sources is normalized into a retrievable array.
+
 ### 3.2.0
 Added:
 * More flexible recognition of proxies. See the proxy section of the readme for more info.

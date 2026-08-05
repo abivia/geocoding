@@ -9,13 +9,20 @@ use PHPUnit\Framework\TestCase;
 
 class IpStackTest extends TestCase
 {
+    protected function getConfig(): array {
+        $keyFile = __DIR__ . '/../../.ipstack-key';
+        if (file_exists($keyFile)) {
+            $key = json_decode(file_get_contents($keyFile), true);
+        } else {
+            $key = [];
+        }
+        return $key;
+    }
+
     public function testLookup()
     {
-        $keyfile = __DIR__ . '/../../.ipstack-key';
-        if (!file_exists($keyfile)) {
-            $this->fail("$keyfile file not found.");
-        }
-        $geocoder = new Geocoder(IpStackApi::make(trim(file_get_contents($keyfile))));
+        $key = $this->getConfig();
+        $geocoder = new Geocoder(IpStackApi::make($key));
         $result = $geocoder->lookup('173.239.198.14');
         $this->assertNotNull($result);
         $this->assertNotNull($result);
@@ -46,12 +53,7 @@ class IpStackTest extends TestCase
 
     public function testLookupLocalhost()
     {
-        $keyFile = __DIR__ . '/../../.ipstack-key';
-        if (file_exists($keyFile)) {
-            $key = trim(file_get_contents($keyFile));
-        } else {
-            $key = '';
-        }
+        $key = $this->getConfig();
         $geocoder = new Geocoder(IpStackApi::make($key));
 
         $result = $geocoder->lookup('127.0.0.1');

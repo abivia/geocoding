@@ -4,137 +4,26 @@ declare(strict_types=1);
 namespace Abivia\Geocode\GeocodeResult;
 
 /**
- * Container for a result returned by ipinfo.io.
+ * Container for a result returned by ipapi.co.
  */
-class IpApiResult implements GeocodeResult
+class IpApiResult extends GeocodeResult
 {
-    private ?array $data;
-    private bool $fromCache = false;
-
-    public function __construct(?array $data)
+    protected function normalize(): void
     {
-        $this->data = $data;
-    }
-
-    public function cached(?bool $set = null): bool
-    {
-        if ($set !== null) {
-            $this->fromCache = $set;
-        }
-        return $this->fromCache;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAddressLine1(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAddressLine2(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAdministrativeArea(): ?string
-    {
-        return $this->data['region'] ?? ($this->data['region_name'] ??null);
-    }
-
-    /**
-     * The administrative area (state, province, etc) as a code, if available.
-     */
-    public function getAdministrativeAreaCode(): ?string
-    {
-        return $this->data['region_code'] ?? null;
-    }
-
-    /**
-     * The name of the country
-     */
-    public function getCountry(): ?string
-    {
-        return $this->data['country_name'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getCountryCode(): ?string
-    {
-        return $this->data['country_code'] ?? null;
-    }
-
-    public function getData(): ?array
-    {
-        return $this->data;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getDependentLocality(): ?string
-    {
-        return null;
-    }
-
-    public function getIpAddress(): string
-    {
-        return $this->data['ip'];
-    }
-
-    public function getLatitude(): ?float
-    {
-        return $this->data['latitude'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getLocale(): ?string
-    {
-        return $this->data['languages'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getLocality(): ?string
-    {
-        return $this->data['city'] ?? null;
-    }
-
-    public function getLongitude(): ?float
-    {
-        return $this->data['longitude'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getPostalCode(): ?string
-    {
-        return $this->data['postal'] ?? ($this->data['zip'] ?? null);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getSortingCode(): ?string
-    {
-        return $this->data['postal'] ?? ($this->data['zip'] ?? null);
-    }
-
-    public function getTimezone(): ?string
-    {
-        return $this->data['timezone'] ?? null;
+        $this->normalized['adminArea'] = $this->data['region'] ?? null;
+        $this->normalized['adminAreaCode'] = $this->data['region_name'] ?? null;
+        $this->normalized['asn'] = $this->data['asn'] ?? null;
+        $this->normalized['country'] = $this->data['country_name'] ?? null;
+        $this->normalized['countryCode2'] = $this->data['country_code'] ?? null;
+        $this->normalized['countryCode3'] = $this->data['country_code_iso3'] ?? null;
+        $this->normalized['hostname'] = $this->data['hostname'] ?? null;
+        $this->normalized['ipAddress'] = $this->data['ip'] ?? null;
+        $this->normalized['latitude'] = $this->data['latitude'] ?? null;
+        $this->normalized['locale'] = $this->data['languages'] ?? null;
+        $this->normalized['locality'] = $this->data['city'] ?? null;
+        $this->normalized['longitude'] = $this->data['longitude'] ?? null;
+        $this->normalized['postalCode'] = $this->data['postal'];
+        $this->normalized['timezone'] = $this->data['timezone'] ?? null;
     }
 
 }

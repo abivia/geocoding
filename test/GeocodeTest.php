@@ -5,23 +5,40 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Abivia\Geocode\AddressNotFoundException;
 use Abivia\Geocode\Geocoder;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-require_once 'FakeService.php';
+require_once 'LookupService/FakeCacheableService.php';
 
 class GeocodeTest extends TestCase
 {
+    public FakeCacheableService $lookupService;
     public Geocoder $testObj;
+
+    private function record(string $ip, $country = 'CA'): array
+    {
+        return [
+            'ip' => $ip,
+            'city' => 'Testerville',
+            'country_name' => 'Canada',
+            'country_code' => $country,
+            'is_crawler' => false,
+            'is_tor' => false,
+        ];
+    }
+
     public function setUp(): void
     {
         parent::setUp();
-        $this->testObj = new Geocoder(new FakeService());
+        $this->lookupService = new FakeCacheableService();
+        $this->testObj = new Geocoder($this->lookupService);
     }
 
     public function testLookup()
     {
+        $this->lookupService->data['173.239.198.14'] = $this->record('173.239.198.14');
         $result = $this->testObj->lookup('173.239.198.14');
         $this->assertNotNull($result);
-        $this->assertEquals('US', $result->getCountryCode());
+        $this->assertEquals('CA', $result->getCountryCode());
         $this->assertEquals('173.239.198.14', $result->getIpAddress());
     }
 
@@ -39,6 +56,8 @@ class GeocodeTest extends TestCase
 
     public function testLookupHttp()
     {
+        $this->lookupService->data['67.61.113.220'] = $this->record('67.61.113.220', 'US');
+        $this->lookupService->data['148.170.126.209'] = $this->record('148.170.126.209');
         $_SERVER = ['REMOTE_ADDR' => '67.61.113.220'];
         $result = $this->testObj->lookupHttp();
         $this->assertNotNull($result);
@@ -57,6 +76,8 @@ class GeocodeTest extends TestCase
 
     public function testLookupHttpViaProxy()
     {
+        $this->lookupService->data['67.61.113.220'] = $this->record('67.61.113.220', 'US');
+        $this->lookupService->data['148.170.126.209'] = $this->record('148.170.126.209');
         $_SERVER = ['REMOTE_ADDR' => '67.61.113.220'];
         $result = $this->testObj->lookupHttp();
         $this->assertNotNull($result);
@@ -87,6 +108,7 @@ class GeocodeTest extends TestCase
 
     public function testLookupHttpBadForward()
     {
+        $this->lookupService->data['67.61.113.220'] = $this->record('67.61.113.220', 'US');
         // Check the bad actor case
         $_SERVER = [
             'REMOTE_ADDR' => '67.61.113.220',
@@ -100,7 +122,9 @@ class GeocodeTest extends TestCase
 
     public function testLookupHttpNoForward()
     {
-        // Check the bad actor case
+        $this->lookupService->data['67.61.113.220'] = $this->record('67.61.113.220', 'US');
+        $this->lookupService->data['148.170.126.209'] = $this->record('148.170.126.209');
+
         $_SERVER = [
             'REMOTE_ADDR' => '67.61.113.220',
             'HTTP_X_FORWARDED_FOR' => '148.170.126.209'
@@ -120,6 +144,7 @@ class GeocodeTest extends TestCase
 
     public function testLookupSubNetV4()
     {
+        $this->lookupService->data['173.239.198.14'] = $this->record('173.239.198.14');
         $result = $this->testObj->lookup('173.239.198.14');
         $this->assertNotNull($result);
         $this->assertEquals('173.239.198.14', $result->getIpAddress());
@@ -127,6 +152,8 @@ class GeocodeTest extends TestCase
 
     public function testLookupSubNetV4Cached()
     {
+        $this->lookupService->data['173.239.198.14'] = $this->record('173.239.198.14');
+        $this->lookupService->setCache(new ArrayAdapter());
         $result = $this->testObj->lookup('173.239.198.14');
         $this->assertNotNull($result);
         $result = $this->testObj->lookupSubNet('173.239.198.99');

@@ -6,136 +6,35 @@ namespace Abivia\Geocode\GeocodeResult;
 /**
  * Container for a result returned by ipstack.com.
  */
-class IpStackResult implements GeocodeResult
+class IpStackResult extends GeocodeResult
 {
-    private ?array $data;
-
-    private bool $fromCache = false;
-
-    public function __construct(?array $data)
+    protected function normalize()
     {
-        $this->data = $data;
-    }
-
-    public function cached(?bool $set = null): bool
-    {
-        if ($set !== null) {
-            $this->fromCache = $set;
+        $this->normalized['adminArea'] = $this->data['region_name'] ?? null;
+        $this->normalized['adminAreaCode'] = $this->data['region_code'] ?? null;
+        $this->normalized['asn'] = $this->data['connection']['asn'] ?? null;
+        $this->normalized['country'] = $this->data['country_name'] ?? null;
+        $this->normalized['countryCode2'] = $this->data['country_code'] ?? null;
+        $this->normalized['ipAddress'] = $this->data['ip'] ?? null;
+        $this->normalized['latitude'] = $this->data['latitude'] ?? null;
+        $this->normalized['locality'] = $this->data['city'] ?? null;
+        $this->normalized['longitude'] = $this->data['longitude'] ?? null;
+        $this->normalized['postalCode'] = $this->data['zip'] ?? null;
+        $this->normalized['timezone'] = $this->data['time_zone']['id'] ?? null;
+        $security = $this->data['security'] ?? [];
+        if ($security['is_proxy'] ?? false) {
+            $this->normalized['isAnonymous'] = true;
+            $this->normalized['isAnonymousProxy'] = true;
+            switch ($this->data['proxy_type']) {
+                case 'hosting':
+                    $this->normalized['isHosting'] = true;
+                    break;
+                case 'VPN':
+                    $this->normalized['isVpn'] = true;
+                    break;
+            }
         }
-        return $this->fromCache;
+        $this->normalized['isCrawler'] = $this->data['is_crawler'] ?? null;
+        $this->normalized['isTor'] = $this->data['is_tor'] ?? null;
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAddressLine1(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAddressLine2(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAdministrativeArea(): ?string
-    {
-        return $this->data['region_name'] ?? null;
-    }
-
-    /**
-     * The administrative area (state, province, etc) as a code, if available.
-     */
-    public function getAdministrativeAreaCode(): ?string
-    {
-        return $this->data['region_code'] ?? null;
-    }
-
-    /**
-     * The name of the country
-     */
-    public function getCountry(): ?string
-    {
-        return $this->data['country_name'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getCountryCode(): ?string
-    {
-        return $this->data['country_code'] ?? null;
-    }
-
-    public function getData(): ?array
-    {
-        return $this->data;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getDependentLocality(): ?string
-    {
-        return null;
-    }
-
-    public function getIpAddress(): string
-    {
-        return $this->data['ip'];
-    }
-
-    public function getLatitude(): ?float
-    {
-        return $this->data['latitude'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getLocale(): ?string
-    {
-        return 'en-US';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getLocality(): ?string
-    {
-        return $this->data['city'] ?? null;
-    }
-
-    public function getLongitude(): ?float
-    {
-        return $this->data['longitude'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getPostalCode(): ?string
-    {
-        return $this->data['zip'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getSortingCode(): ?string
-    {
-        return null;
-    }
-
-    public function getTimezone(): ?string
-    {
-        return $this->data['time_zone']['id'] ?? null;
-    }
-
 }

@@ -14,10 +14,12 @@ seamlessly support other IP address geocoding services.
 
 Geocoding requires:
 
-* PHP 8.2 or higher
+* PHP 8.4 or higher
 * ext-curl to perform API calls
 * abivia/cogs for address support
+* nesbot/carbon for date support
 * mlocati/ip-lib for IP address support
+* symfony/cache for caching
 
 PHP does not need to be built with IPv6 support.
 
@@ -27,40 +29,53 @@ Via composer:
 
 ```composer require abivia/geocoding```
 
+## Configuration
+
+Configuration is passed to the lookup service at object instantiation, 
+either to the constructor or through the `make()` factory method. 
+All services recognize these common values:
+
+* `key` The authentication key or token required to access the service.
+* `ttl` The time, in seconds, to cache a successful lookup result. 
+If not provided, the default is 24 hours.
+* `missTtl` The time, in seconds, to cache a failed lookup. The default is 6 hours.
+
+In addition, the `IpInfoApi` service accepts an API fallback list, stored in `apiList`.
+Possible elements in the list are `core`, `lite`, and `free`.
+The default is `['lite', 'free']`
+Geocoder will attempt to use each API in the order provided.
+If a service returns a HTTP 429, indicating that a monthly limit has been hit,
+the next API in the list will be used. If a cache is provided, 
+the lookup failure will be recorded and that API will not be accessed for `newMonth`
+seconds after midnight on the first of the month. The default for `newMonth` is 24 hours.
+The delay is to prevent a race condition where a 429 is received at the beginning of a new month,
+which would cause an undesirable immediate fall-over to the next service for another month.
+
 ## Caching
 
-Geocoding comes with two cache handlers designed for light use and a database cache for heavier use.
-The array cache will retain lookup results for the lifetime of the current request (or session if
-stored in a session variable).
-The file cache stores cached data in a text file.
-Neither offers support for concurrent requests.
+Geocoding 3.x uses the Symfony cache mechanism.
+Pass the cache adapter to the lookup service via the `setCache()` method.
+The same cache can be used with multiple services without collisions.
+Each service adds its name to the cache along with the Ip address.
+This replaces the custom mechanism in previous versions.
 
-The PDO Cache takes a connection to a database, optionally with table names to override the
-default tables `geocoder_cache_ip`, `geocoder_cache_subnet` and `geocoder_cache_options`.
-The cache handler will create these tables if they do not already exist.
+## Data normalization
 
-Applications can create persistent caches by conforming to the CacheHandler interface. Caches
-support different retention times for lookup hits and lookup misses.
-In a file cache, the default retention time for a successful lookup is seven days, 
-the default retention time for a failed lookup is one hour.
-The PDO cache defaults to 30 days for a successful lookup and one hour for a failed lookup.
+The lookup results from different services are normalized across providers.
+Applications can access both the normalized and raw data from a service through the
+GeocodeResult::data() method.
+Passing no argument or false will return data from the lookup service.
+Passing true will retrieve the normalized array. If a data element is not present in the response,
+the normalized result will contain null.
 
-### Cache Purging
-
-Array caches are expected to be transient, so there is no purge logic.
-The file cache runs a purge at the time the cache is loaded.
-The PDO cache runs at the interval set by the `purgeCacheTime()` method, which defaults to 24 hours.
-On the first object creation, 
-the last purge time is loaded from the database and cached in the session to reduce overhead.
-
-### Proxy headers
+## Proxy headers
 
 The static `getAddressFromHttp()` method now accepts an optional `$proxyHeaders`
 parameter. If the parameter is null or not provided, and `allowHeaders` is true,
 GeoCoder looks for `HTTP_CF_CONNECTING_IP`, `HTTP_CLIENT_IP`,
 and `HTTP_X_FORWARDED_FOR` headers, 
 in that order (more proxies may be added as they are discovered).
-A `GeoCoder` instance can maintain an independent proxy list.
+Each `GeoCoder` instance can maintain an independent proxy list.
 
 By default, and address lookup via `Geocoder::lookupHttp()` checks for the `HTTP_X_FORWARDED_FOR`
 header. However, other services such as CloudFlare use non-standard headers. A call to
@@ -77,35 +92,18 @@ in the reverse order that they are added, so that the most recently added header
 use Abivia\Geocode\Geocoder;
 use Abivia\Geocode\LookupService\IpInfoApi;
 
-$geocoder = new Geocoder(IpInfoApi::make());
-$info = $geocoder->lookup('4.4.4.4');
-echo $info->getLatitude() . ', ' . $info->getLongitude();
-```
-
-The geocoder normalizes results from different services using the GeocodeResult interface, but 
-applications can retrieve the service's response through the GeocodeResult::data() method to access
-extended information.
-
-## Example using a file cache
-
-```php
-use Abivia\Geocode\CacheHandler\FileCache;
-use Abivia\Geocode\Geocoder;
-use Abivia\Geocode\LookupService\IpInfoApi;
-
-// Get a cache and set the cache time for a hit to six hours
-$cache = new FileCache('mycache.json');
-$cache->hitCacheTime(6 * 3600);
-$geocoder = new Geocoder(IpInfoApi::make(), $cache);
+$geocoder = new Geocoder(IpInfoApi::make(['key' => 'my_token']));
 $info = $geocoder->lookup('4.4.4.4');
 echo $info->getLatitude() . ', ' . $info->getLongitude();
 ```
 
 ## Subnet queries
 
-For the most part from a geolocation perspective, only the first 24 bits of an IPv4 and the first
-48 of an IPv6 address are significant. Geocoding provides a "subnet" query that will return the last
-queries result in the v4 or v6 range. This can reduce the number of queries on the lookup service,
+From a geolocation perspective, often only the first 24 bits of an IPv4
+and the first 48 of an IPv6 address are significant.
+When caching is enabled, Geocoding provides a "subnet" query that will return the first
+cached result in the same subnet.
+This can reduce the number of queries on the lookup service,
 increasing performance and (in the case of paid services) reducing costs.
 
 ### Subnet Example
@@ -124,7 +122,18 @@ echo $info->getLatitude() . ', ' . $info->getLongitude();
 $info2 = $geocoder->lookupSubnet('4.4.4.8');
 ```
 
-## Donations welcome
+# Use of Generative AI
+
+The functional code was developed by hand. Most test cases were generated with the help of AI.
+When running the first batch of tests, 
+the algorithm detected an error and injected a one statement fix.
+The fix was incomplete, suboptimal, and based on a partial understanding of the issue.
+It has been removed and corrected.
+From there, all changes to the code to address failing tests (and some updates to the tests)
+were done without the assistance of AI beyond something that suggested line completion
+(with a 45% error rate, hardly useful.)
+
+# Donations welcome
 
 If you're getting something out of Geocoding, you can sponsor us in any amount you wish using Liberapay
 [![Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/abivia/donate).

@@ -6,154 +6,76 @@ namespace Abivia\Geocode\GeocodeResult;
 /**
  * Container for a result returned by ipinfo.io.
  */
-class IpInfoResult implements GeocodeResult
+class IpInfoResult extends GeocodeResult
 {
-    private ?array $data;
-    private bool $fromCache = false;
-    protected ?float $latitude;
-    protected ?float $longitude;
-
-    public function __construct(?array $data)
+    protected function normalize()
     {
-        $this->data = $data;
-    }
-
-    public function cached(?bool $set = null): bool
-    {
-        if ($set !== null) {
-            $this->fromCache = $set;
-        }
-        return $this->fromCache;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAddressLine1(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAddressLine2(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAdministrativeArea(): ?string
-    {
-        return $this->data['region'] ?? null;
-    }
-
-    /**
-     * The administrative area (state, province, etc) as a code, if available.
-     */
-    public function getAdministrativeAreaCode(): ?string
-    {
-        return null;
-    }
-
-    /**
-     * The name of the country
-     */
-    public function getCountry(): ?string
-    {
-        return $this->data['country'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getCountryCode(): ?string
-    {
-        return $this->data['country'] ?? null;
-    }
-
-    public function getData(): ?array
-    {
-        return $this->data;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getDependentLocality(): ?string
-    {
-        return null;
-    }
-
-    public function getIpAddress(): string
-    {
-        return $this->data['ip'];
-    }
-
-    public function getLatitude(): ?float
-    {
-        if (!isset($this->latitude)) {
+        $this->normalized['ipAddress'] = $this->data['ip'];
+        if ($this->data['_api'] === 'core') {
+            $this->normalized['latitude'] = (float)trim($this->data['geo']['latitude'] ?? null);
+            $this->normalized['longitude'] = (float)trim($this->data['geo']['longitude'] ?? null);
+            $this->normalizeGeo($this->data['geo']);
+            $this->normalized['asn'] = $this->data['as']['asn'] ?? null;
+            $this->normalized['asnName'] = $this->data['as']['name'] ?? null;
+            $this->normalized['asnDomain'] = $this->data['as']['domain'] ?? null;
+            $this->normalized['asnType'] = $this->data['as']['type'] ?? null;
+            $this->normalized['isAnonymous'] = $this->data['is_anonymous'];
+            $this->normalized['isAnycast'] = $this->data['is_anycast'];
+            $this->normalized['isHosting'] = $this->data['is_hosting'];
+            $this->normalized['isMobile'] = $this->data['is_mobile'];
+            $this->normalized['isSatellite'] = $this->data['is_satellite'];
+            $this->normalized['isAnonymousProxy'] = $this->data['anonymous']['is_proxy'] ?? null;
+            $this->normalized['isAnonymousRelay'] = $this->data['anonymous']['is_relay'] ?? null;
+            $this->normalized['isAnonymousTor'] = $this->data['anonymous']['is_tor'] ?? null;
+            $this->normalized['isAnonymousVpn'] = $this->data['anonymous']['is_vpn'] ?? null;
+        } else {
             $this->parseLoc();
+            $this->normalizeGeo($this->data);
+            if ($this->data['_api'] === 'free') {
+                // Free has the ASN and name in a single string.
+                [$this->normalized['asn'], $this->normalized['asnName']]
+                    = explode(' ', $this->data['org'], 2);
+                $this->normalized['asnDomain'] = null;
+
+                // Free returns the country code as country.
+                $this->normalized['countryCode'] = $this->data['country'] ?? null;
+            } else {
+                $this->normalized['asn'] = $this->data['asn'] ?? null;
+                $this->normalized['asnName'] = $this->data['as_name'] ?? null;
+                $this->normalized['asnDomain'] = $this->data['as_domain'] ?? null;
+            }
+            $this->normalized['asnType'] = null;
+            $this->normalized['isAnonymous'] = null;
+            $this->normalized['isAnycast'] = null;
+            $this->normalized['isHosting'] = null;
+            $this->normalized['isMobile'] = null;
+            $this->normalized['isSatellite'] = null;
+            $this->normalized['isAnonymousProxy'] = null;
+            $this->normalized['isAnonymousRelay'] = null;
+            $this->normalized['isAnonymousTor'] = null;
+            $this->normalized['isAnonymousVPN'] = null;
         }
-        return $this->latitude;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getLocale(): ?string
+    private function normalizeGeo(?array $data = [])
     {
-        return 'en-US';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getLocality(): ?string
-    {
-        return $this->data['city'] ?? null;
-    }
-
-    public function getLongitude(): ?float
-    {
-        if (!isset($this->longitude)) {
-            $this->parseLoc();
-        }
-        return $this->longitude;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getPostalCode(): ?string
-    {
-        return $this->data['postal'] ?? null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getSortingCode(): ?string
-    {
-        return $this->data['postal'] ?? null;
-    }
-
-    public function getTimezone(): ?string
-    {
-        return $this->data['timezone'] ?? null;
+        $this->normalized['adminArea'] = $data['region'] ?? null;
+        $this->normalized['adminAreaCode'] = $data['region_code'] ?? null;
+        $this->normalized['continent'] = $data['continent'] ?? null;
+        $this->normalized['continentCode'] = $data['continent_code'] ?? null;
+        $this->normalized['country'] = $data['country'] ?? null;
+        $this->normalized['countryCode2'] = $data['countryCode'] ?? null;
+        $this->normalized['locality'] = $data['city'] ?? null;
+        $this->normalized['postalCode'] = $data['postal_code'] ?? ($data['postal'] ?? null);
+        $this->normalized['timezone'] = $data['timezone'] ?? null;
     }
 
     private function parseLoc()
     {
         if (isset($this->data['loc'])) {
             $parts = explode(',', $this->data['loc']);
-            $this->latitude = (float)trim($parts[0]);
-            $this->longitude = (float)trim($parts[1]);
-        } else {
-            $this->latitude = null;
-            $this->longitude = null;
+            $this->normalized['latitude'] = (float)trim($parts[0]);
+            $this->normalized['longitude'] = (float)trim($parts[1]);
         }
     }
 

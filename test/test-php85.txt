@@ -1,0 +1,10 @@
+PHPUnit 10.5.58 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.9
+Configuration: D:\data\code\abivia\geocoding\test\phpunit.xml
+
+......................                                            22 / 22 (100%)
+
+Time: 00:00.064, Memory: 32.00 MB
+
+OK (22 tests, 66 assertions)

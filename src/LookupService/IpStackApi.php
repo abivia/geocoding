@@ -15,7 +15,7 @@ use function curl_setopt;
 *
 * @link    https://github.com/abivia/geocode
 */
-class IpStackApi implements LookupService
+class IpStackApi extends AbstractService
 {
     /**
      * @var string API access key
@@ -25,19 +25,24 @@ class IpStackApi implements LookupService
     /**
      * @var string Default API base URL (https only on paid plan)
      */
-    protected string $baseUrl = 'http://api.ipstack.com';
+    protected string $baseUrl;
 
     /**
-     * @param string $accessKey
+     * @var array paid/free API endpoints
      */
-    public function __construct(string $accessKey)
-    {
-        $this->accessKey = $accessKey;
-    }
+    protected array $baseUrlMap = [
+        'free' => 'http://api.ipstack.com',
+        'paid' => 'https://api.ipstack.com',
+    ];
 
-    public static function make(string $accessKey): static
+    /**
+     * @param array $config
+     */
+    public function __construct(array $config = [])
     {
-        return new static($accessKey);
+        parent::__construct($config);
+        $this->accessKey = $config['key'] ?? '';
+        $this->baseUrl = $this->baseUrlMap[$this->accessKey === '' ? 'free' : 'paid'];
     }
 
     /**
@@ -47,20 +52,21 @@ class IpStackApi implements LookupService
      * @return array|null
      * @throws LookupFailedException
      */
-    public function query(string $address): ?IpStackResult
+    public function queryCore(string $address): ?IpStackResult
     {
         $url = "$this->baseUrl/$address?" . http_build_query(['access_key' => $this->accessKey]);
-        $channel = curl_init($url);
-        curl_setopt($channel, CURLOPT_RETURNTRANSFER, true);
-        $json = curl_exec($channel);
-        curl_close($channel);
-        if (is_string($json)) {
-            $response = json_decode($json, true);
+        $this->providerLookup($url);
+        if ($this->lookupHttpCode !== 200) {
+            throw new LookupFailedException("HTTP Error on request $this->lookupHttpCode");
+        }
+        if (is_string($this->lookupResult)) {
+            $response = json_decode($this->lookupResult, true);
             if ($response === null) {
                 throw new LookupFailedException("Response was not valid JSON.");
             }
             if ($response['error'] ?? false) {
-                throw new LookupFailedException("{$response['type']}: {$response['info']}");
+                $error = $response['error'];
+                throw new LookupFailedException("{$error['type']}: {$error['info']}");
             }
             return new IpStackResult($response);
         }
