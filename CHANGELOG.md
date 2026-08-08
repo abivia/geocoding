@@ -1,5 +1,9 @@
 # Change log
 
+### 4.0.2
+Fixed:
+* Fixed the fix in 4.0.1.
+
 ### 4.0.1
 Fixed:
 * IpInfoResult incorrectly stored the country code for core and free APIs.

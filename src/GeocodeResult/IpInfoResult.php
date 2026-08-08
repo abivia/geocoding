@@ -54,7 +54,7 @@ class IpInfoResult extends GeocodeResult
         $this->normalized['continent'] = $data['continent'] ?? null;
         $this->normalized['continentCode'] = $data['continent_code'] ?? null;
         $this->normalized['country'] = $data['country'] ?? null;
-        $this->normalized['countryCode2'] = $data['countryCode'] ?? null;
+        $this->normalized['countryCode2'] = $data['country_code'] ?? null;
         $this->normalized['locality'] = $data['city'] ?? null;
         $this->normalized['postalCode'] = $data['postal_code'] ?? ($data['postal'] ?? null);
         $this->normalized['timezone'] = $data['timezone'] ?? null;
