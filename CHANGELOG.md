@@ -1,5 +1,9 @@
 # Change log
 
+### 4.0.1
+Fixed:
+* IpInfoResult incorrectly stored the country code for core and free APIs.
+
 ### 4.0.0
 Breaking Changes:
 * Dropped PHP <= 8.3

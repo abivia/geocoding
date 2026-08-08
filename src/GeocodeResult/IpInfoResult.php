@@ -38,22 +38,12 @@ class IpInfoResult extends GeocodeResult
                 $this->normalized['asnDomain'] = null;
 
                 // Free returns the country code as country.
-                $this->normalized['countryCode'] = $this->data['country'] ?? null;
+                $this->normalized['countryCode2'] = $this->data['country'] ?? null;
             } else {
                 $this->normalized['asn'] = $this->data['asn'] ?? null;
                 $this->normalized['asnName'] = $this->data['as_name'] ?? null;
                 $this->normalized['asnDomain'] = $this->data['as_domain'] ?? null;
             }
-            $this->normalized['asnType'] = null;
-            $this->normalized['isAnonymous'] = null;
-            $this->normalized['isAnycast'] = null;
-            $this->normalized['isHosting'] = null;
-            $this->normalized['isMobile'] = null;
-            $this->normalized['isSatellite'] = null;
-            $this->normalized['isAnonymousProxy'] = null;
-            $this->normalized['isAnonymousRelay'] = null;
-            $this->normalized['isAnonymousTor'] = null;
-            $this->normalized['isAnonymousVPN'] = null;
         }
     }
 
