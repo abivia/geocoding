@@ -68,6 +68,10 @@ Passing no argument or false will return data from the lookup service.
 Passing true will retrieve the normalized array. If a data element is not present in the response,
 the normalized result will contain null.
 
+## GeocodeResult is immutable
+
+A new instance with updated data can be created using the `GeocodeResult::copyWith()` method.
+
 ## Proxy headers
 
 The static `getAddressFromHttp()` method now accepts an optional `$proxyHeaders`

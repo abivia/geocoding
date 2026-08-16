@@ -33,6 +33,14 @@ class GeocodeTest extends TestCase
         $this->testObj = new Geocoder($this->lookupService);
     }
 
+    public function testCopyWith()
+    {
+        $this->lookupService->data['173.239.198.14'] = $this->record('173.239.198.14');
+        $lookup = $this->testObj->lookup('173.239.198.14');
+        $result = $lookup->copyWith(['connection' => ['asn' => 'AS1234']]);
+        $this->assertEquals('AS1234', $result->getAsn());
+    }
+
     public function testLookup()
     {
         $this->lookupService->data['173.239.198.14'] = $this->record('173.239.198.14');

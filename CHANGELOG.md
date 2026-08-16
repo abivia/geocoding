@@ -1,5 +1,9 @@
 # Change log
 
+### 4.1.0
+Added:
+* The `GeocodeResult::copyWith()` method copies a result with the supplied data merged in.
+
 ### 4.0.2
 Fixed:
 * Fixed the fix in 4.0.1.

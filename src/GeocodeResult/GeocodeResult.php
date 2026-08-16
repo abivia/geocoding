@@ -72,6 +72,16 @@ abstract class GeocodeResult implements AddressProperties
     }
 
     /**
+     * Create a new instance after merging the fields in $data.
+     * @param array $data
+     * @return static
+     */
+    public function copyWith(array $data = []): static
+    {
+        return new static(array_merge($this->data, $data));
+    }
+
+    /**
      * @inheritDoc
      */
     public function getAddressLine1(): ?string
