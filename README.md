@@ -71,6 +71,8 @@ the normalized result will contain null.
 ## GeocodeResult is immutable
 
 A new instance with updated data can be created using the `GeocodeResult::copyWith()` method.
+The `GeocodeResult::copyNormalized()` method creates a new instance, 
+updating the normalized data but leaving the source data unmodified.
 
 ## Proxy headers
 

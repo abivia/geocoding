@@ -1,5 +1,13 @@
 # Change log
 
+### 4.2.0
+Added:
+* The `GeocodeResult::copyNormalized()` method copies a result with the supplied data merged in.
+This only affects the normalized data, the original source data is not changed.
+
+Changed:
+* The `GeocodeResult` constructor now has an optional argument for the normalized data.
+
 ### 4.1.0
 Added:
 * The `GeocodeResult::copyWith()` method copies a result with the supplied data merged in.

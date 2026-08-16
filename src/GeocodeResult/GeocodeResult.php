@@ -57,10 +57,14 @@ abstract class GeocodeResult implements AddressProperties
         'timezone' => null,                 // Region/city
     ];
 
-    public function __construct(?array $data)
+    public function __construct(?array $data, ?array $normalized = null)
     {
         $this->data = $data;
-        $this->normalize();
+        if ($normalized === null) {
+            $this->normalize();
+        } else {
+            $this->normalized = $normalized;
+        }
     }
 
     public function cached(?bool $set = null): bool
@@ -72,7 +76,18 @@ abstract class GeocodeResult implements AddressProperties
     }
 
     /**
-     * Create a new instance after merging the fields in $data.
+     * Create a new instance after merging the fields in $normalized into the normalized data.
+     * The original data  is unmodified.
+     * @param array $normalized
+     * @return static
+     */
+    public function copyNormalized(array $normalized = []): static
+    {
+        return new static($this->data, array_merge($this->normalized, $normalized));
+    }
+
+    /**
+     * Create a new instance after merging the fields in $data. The result is then renormalized.
      * @param array $data
      * @return static
      */
